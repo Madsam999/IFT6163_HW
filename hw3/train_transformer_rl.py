@@ -74,14 +74,66 @@ class TransformerPolicyWrapper:
     """
 
     def __init__(self, checkpoint_path: str, device: torch.device, cfg: DictConfig):
-        # TODO: Load the HW1 transformer checkpoint and reconstruct the model.
-        self.model = None
+        import dill
+        # The HW1 checkpoint is saved as a full model object via torch.save(model, path, pickle_module=dill)
+        self.model = torch.load(checkpoint_path, map_location=device, pickle_module=dill)
+        self.model.to(device)
+        self.model.eval()
         self.device = device
         self.cfg = cfg
-        pass
+        self._context = []
+        # Register a learnable log_std on the model itself so it appears in model.parameters()
+        # and is saved/loaded with the checkpoint naturally.
+        action_dim = cfg.policy.action_dim
+        self.model.rl_log_std = nn.Parameter(torch.zeros(action_dim, device=device))
 
     def reset_context(self):
         self._context = []
+
+    def _compute_action_mean(self, obs_t: torch.Tensor) -> torch.Tensor:
+        """
+        Run the GRP model forward on a batch of state vectors and return action means.
+
+        The GRP model can operate in two modes depending on the checkpoint:
+          - Newer API: encode_pose() + forward(observations=None, ..., pose=pose, ...)
+          - Legacy API: dummy image/goal tensors + forward(images, goals, goal_imgs, pose=pose)
+        """
+        B = obs_t.shape[0]
+        model_cfg = self.model._cfg
+        action_dim = self.cfg.policy.action_dim
+
+        if hasattr(self.model, 'encode_pose'):
+            # Newer GRP API: privileged-state-only mode (no images needed)
+            pose = self.model.encode_pose(obs_t.unsqueeze(1))  # (B, 1, obs_dim) -> encoded
+            out = self.model.forward(
+                observations=None, text_goal=None, goal_image=None,
+                mask_=True, pose=pose, last_action=None,
+            )
+            raw = out['actions'] if isinstance(out, dict) else (out[0] if isinstance(out, tuple) else out)
+        else:
+            # Legacy API: feed zeros for image/goal inputs, state as pose
+            h = model_cfg.image_shape[0]
+            w = model_cfg.image_shape[1]
+            stacking = model_cfg.policy.obs_stacking
+            dummy_img = torch.zeros(B, h, w, 3 * stacking, device=self.device)
+            dummy_goal_txt = torch.zeros(B, model_cfg.max_block_size, dtype=torch.long, device=self.device)
+            dummy_goal_img = torch.zeros(B, h, w, 3, device=self.device)
+            encoded_pose = self.model.encode_state(obs_t.unsqueeze(1))
+            out, _ = self.model.forward(dummy_img, dummy_goal_txt, dummy_goal_img, pose=encoded_pose)
+            raw = out
+
+        decoded = self.model.decode_action(raw)  # undo action normalisation
+        # The model may predict action_stacking steps; take only the first action_dim values
+        return decoded.reshape(B, -1)[:, :action_dim]
+
+    def forward(self, obs: torch.Tensor):
+        """
+        Return a Normal distribution over actions for a batched obs tensor.
+        Called by ppo_update() during the gradient update step.
+        """
+        mean = self._compute_action_mean(obs)
+        std = self.model.rl_log_std.exp().expand_as(mean)
+        return Normal(mean, std)
 
     def get_action(self, obs: np.ndarray, deterministic: bool = False):
         """
@@ -95,8 +147,26 @@ class TransformerPolicyWrapper:
             log_prob: scalar tensor
             entropy: scalar tensor
         """
-        # TODO: Run a forward pass through the transformer and return (action, log_prob, entropy).
-        raise NotImplementedError
+        obs_t = torch.tensor(obs, dtype=torch.float32, device=self.device)
+        if obs_t.dim() == 1:
+            obs_t = obs_t.unsqueeze(0)  # (1, obs_dim)
+
+        dist = self.forward(obs_t)
+
+        if deterministic:
+            action = dist.mean
+        else:
+            action = dist.rsample()
+
+        action = action.clamp(-1.0, 1.0)
+        log_prob = dist.log_prob(action).sum(-1)
+        entropy = dist.entropy().sum(-1)
+
+        return (
+            action.squeeze(0).cpu().detach().numpy(),
+            log_prob.squeeze(0).detach(),
+            entropy.squeeze(0).detach(),
+        )
 
     def parameters(self):
         return self.model.parameters()
@@ -124,8 +194,34 @@ def collect_grpo_group(env: FastLIBEROEnv,
     Returns a list of trajectory dicts, each containing:
         obs, actions, log_probs, rewards, dones, total_return
     """
-    # TODO: Collect group_size trajectories all starting from init_state.
     trajectories = []
+    for _ in range(group_size):
+        obs, info = env.reset(options={"init_state": init_state})
+        policy.reset_context()
+
+        traj = {
+            "obs": [], "actions": [], "log_probs": [],
+            "rewards": [], "dones": [], "total_return": 0.0,
+        }
+
+        for _ in range(max_steps):
+            action_np, log_prob, _ = policy.get_action(obs)
+            next_obs, reward, done, truncated, info = env.step(action_np)
+
+            traj["obs"].append(torch.tensor(obs, dtype=torch.float32, device=device))
+            traj["actions"].append(torch.tensor(action_np, dtype=torch.float32, device=device))
+            traj["log_probs"].append(
+                log_prob if isinstance(log_prob, torch.Tensor) else torch.tensor(log_prob, device=device)
+            )
+            traj["rewards"].append(reward)
+            traj["dones"].append(float(done or truncated))
+            traj["total_return"] += reward
+
+            obs = next_obs
+            if done or truncated:
+                break
+
+        trajectories.append(traj)
     return trajectories
 
 
@@ -144,8 +240,58 @@ def grpo_update(policy: TransformerPolicyWrapper,
     Returns:
         dict with "policy_loss", "mean_return"
     """
-    # TODO: Compute group-relative advantages and apply a clipped surrogate loss.
-    return {"policy_loss": 0.0, "mean_return": 0.0}
+    policy.train()
+    total_policy_loss = 0.0
+    total_return = 0.0
+    n_updates = 0
+
+    for group in trajectories_per_group:
+        # --- Group-relative advantage normalisation ---
+        # Each trajectory gets a scalar advantage: how much better/worse it did
+        # than the group average, normalised by the group's standard deviation.
+        returns = [t["total_return"] for t in group]
+        mean_ret = float(np.mean(returns))
+        std_ret = float(np.std(returns)) + 1e-8
+        total_return += mean_ret
+
+        for traj in group:
+            if len(traj["obs"]) == 0:
+                continue
+
+            obs_t = torch.stack(traj["obs"])                          # (T, obs_dim)
+            actions_t = torch.stack(traj["actions"])                  # (T, action_dim)
+            old_log_probs_t = torch.stack(traj["log_probs"]).detach() # (T,)
+            T = obs_t.shape[0]
+
+            # Scalar advantage broadcast to every step in the trajectory
+            advantage = (traj["total_return"] - mean_ret) / std_ret
+            adv_t = torch.full((T,), advantage, device=device, dtype=torch.float32)
+
+            # Re-evaluate the policy under its current parameters
+            dist = policy.forward(obs_t)
+            new_log_probs = dist.log_prob(actions_t).sum(-1)  # (T,)
+            entropy = dist.entropy().sum(-1).mean()
+
+            # Clipped surrogate objective (same as PPO)
+            ratio = (new_log_probs - old_log_probs_t).exp()
+            clip_eps = cfg.training.clip_eps
+            surr1 = ratio * adv_t
+            surr2 = ratio.clamp(1 - clip_eps, 1 + clip_eps) * adv_t
+            policy_loss = -torch.min(surr1, surr2).mean() - cfg.training.ent_coef * entropy
+
+            policy_optimizer.zero_grad()
+            policy_loss.backward()
+            nn.utils.clip_grad_norm_(list(policy.parameters()), cfg.training.max_grad_norm)
+            policy_optimizer.step()
+
+            total_policy_loss += policy_loss.item()
+            n_updates += 1
+
+    n_groups = max(len(trajectories_per_group), 1)
+    return {
+        "policy_loss": total_policy_loss / max(n_updates, 1),
+        "mean_return": total_return / n_groups,
+    }
 
 
 # ---------------------------------------------------------------------------
@@ -170,8 +316,98 @@ def grpo_worldmodel_update(policy: TransformerPolicyWrapper,
     Returns:
         dict with "policy_loss", "mean_imagined_return"
     """
-    # TODO: Roll out imagined trajectories using the world model and apply GRPO.
-    raise NotImplementedError
+    policy.train()
+    obs_t = torch.tensor(current_obs, dtype=torch.float32, device=device).unsqueeze(0)  # (1, obs_dim)
+
+    group_trajs = []
+    group_returns = []
+
+    # ------------------------------------------------------------------
+    # Collect group_size imagined trajectories from the same start state
+    # ------------------------------------------------------------------
+    for _ in range(group_size):
+        pose = obs_t.clone()  # (1, obs_dim) — current (real) observation as start
+        # Encode into the world model's normalised state space
+        encoded_pose = world_model.encode_state(pose) if hasattr(world_model, 'encode_state') else pose
+
+        traj_obs, traj_actions, traj_log_probs, traj_rewards = [], [], [], []
+        total_return = 0.0
+
+        for _ in range(horizon):
+            obs_np = pose.squeeze(0).cpu().detach().numpy()
+            action_np, log_prob, _ = policy.get_action(obs_np)
+            action_t = torch.tensor(action_np, dtype=torch.float32, device=device).unsqueeze(0)
+
+            # Encode action for the world model and step forward
+            encoded_act = world_model.encode_action(action_t) if hasattr(world_model, 'encode_action') else action_t
+            next_pose_enc, reward_pred = world_model.forward(encoded_pose, encoded_act)
+
+            # Decode back to original observation space for the policy
+            next_pose = world_model.decode_state(next_pose_enc) if hasattr(world_model, 'decode_state') else next_pose_enc
+
+            r = reward_pred.squeeze().item()
+            total_return += r
+
+            traj_obs.append(pose.squeeze(0))
+            traj_actions.append(action_t.squeeze(0))
+            traj_log_probs.append(
+                log_prob if isinstance(log_prob, torch.Tensor) else torch.tensor(log_prob, device=device)
+            )
+            traj_rewards.append(r)
+
+            pose = next_pose.detach()
+            encoded_pose = next_pose_enc.detach()
+
+        group_trajs.append({
+            "obs": traj_obs,
+            "actions": traj_actions,
+            "log_probs": traj_log_probs,
+            "total_return": total_return,
+        })
+        group_returns.append(total_return)
+
+    # ------------------------------------------------------------------
+    # GRPO update: group-relative advantages + clipped surrogate loss
+    # ------------------------------------------------------------------
+    mean_ret = float(np.mean(group_returns))
+    std_ret = float(np.std(group_returns)) + 1e-8
+    total_policy_loss = 0.0
+    n_updates = 0
+
+    for traj in group_trajs:
+        T = len(traj["obs"])
+        if T == 0:
+            continue
+
+        obs_stack = torch.stack(traj["obs"])                           # (T, obs_dim)
+        actions_stack = torch.stack(traj["actions"])                   # (T, action_dim)
+        old_log_probs = torch.stack(traj["log_probs"]).detach()        # (T,)
+
+        advantage = (traj["total_return"] - mean_ret) / std_ret
+        adv_t = torch.full((T,), advantage, device=device, dtype=torch.float32)
+
+        dist = policy.forward(obs_stack)
+        new_log_probs = dist.log_prob(actions_stack).sum(-1)
+
+        ratio = (new_log_probs - old_log_probs).exp()
+        clip_eps = cfg.training.clip_eps
+        surr = torch.min(
+            ratio * adv_t,
+            ratio.clamp(1 - clip_eps, 1 + clip_eps) * adv_t,
+        )
+        loss = -surr.mean()
+        loss.backward()  # accumulate; caller is responsible for optimizer.zero_grad / .step
+
+        total_policy_loss += loss.item()
+        n_updates += 1
+
+    # Clip accumulated gradients
+    nn.utils.clip_grad_norm_(list(policy.parameters()), cfg.training.max_grad_norm)
+
+    return {
+        "policy_loss": total_policy_loss / max(n_updates, 1),
+        "mean_imagined_return": mean_ret,
+    }
 
 
 # ---------------------------------------------------------------------------
@@ -279,8 +515,19 @@ def main(cfg: DictConfig):
 
         while total_steps < cfg.training.total_env_steps:
             # Collect groups: reset to different initial states
-            # TODO: Reset env, capture init_state, call collect_grpo_group() num_groups times.
+            # For each group we: (1) reset the env to get a fresh random state,
+            # (2) snapshot that state, (3) re-run the policy group_size times from
+            # the exact same snapshot so GRPO can compare within-group outcomes.
             trajectories_per_group = []
+            for _ in range(cfg.rl.num_groups):
+                env.reset()  # randomise initial state
+                init_state = env.env.sim.get_state()  # MuJoCo SimState snapshot
+                group = collect_grpo_group(
+                    env, policy, init_state,
+                    cfg.rl.group_size, cfg.sim.episode_length, device,
+                )
+                trajectories_per_group.append(group)
+                total_steps += sum(len(t["obs"]) for t in group)
 
             update_info = grpo_update(policy, value_fn, policy_optimizer,
                                       trajectories_per_group, cfg, device)
