@@ -40,8 +40,14 @@ class DensePolicy(nn.Module):
     """
     def __init__(self, obs_dim: int, action_dim: int, hidden_dim: int = 256, n_layers: int = 3):
         super().__init__()
-        # TODO: Build the policy network layers and output heads.
-        pass
+        layers = []
+        in_dim = obs_dim
+        for _ in range(n_layers):
+            layers.extend([nn.Linear(in_dim, hidden_dim), nn.Tanh()])
+            in_dim = hidden_dim
+        self.net = nn.Sequential(*layers)
+        self.mean_head = nn.Linear(hidden_dim, action_dim)
+        self.log_std = nn.Parameter(torch.zeros(action_dim))
 
     def forward(self, obs: torch.Tensor):
         """
@@ -50,8 +56,10 @@ class DensePolicy(nn.Module):
         Returns:
             dist: torch.distributions.Normal over actions
         """
-        # TODO: Return a Normal distribution over actions given obs.
-        pass
+        features = self.net(obs)
+        mean = self.mean_head(features)
+        std = self.log_std.exp().expand_as(mean)
+        return Normal(mean, std)
 
     def get_action(self, obs: torch.Tensor, deterministic: bool = False):
         """Sample an action and return (action, log_prob, entropy)."""
@@ -70,8 +78,13 @@ class DenseValueFunction(nn.Module):
     """MLP value function V(s) for PPO critic."""
     def __init__(self, obs_dim: int, hidden_dim: int = 256, n_layers: int = 3):
         super().__init__()
-        # TODO: Build the value network layers.
-        pass
+        layers = []
+        in_dim = obs_dim
+        for _ in range(n_layers):
+            layers.extend([nn.Linear(in_dim, hidden_dim), nn.Tanh()])
+            in_dim = hidden_dim
+        self.net = nn.Sequential(*layers)
+        self.value_head = nn.Linear(hidden_dim, 1)
 
     def forward(self, obs: torch.Tensor) -> torch.Tensor:
         """Returns scalar value estimate of shape (B,)."""
@@ -123,10 +136,18 @@ class RolloutBuffer:
             returns: (rollout_length,) tensor
             advantages: (rollout_length,) tensor
         """
-        # TODO: Compute GAE advantages and discounted returns.
         returns = torch.zeros_like(self.rewards)
         advantages = torch.zeros_like(self.rewards)
-        pass
+        gae = 0.0
+        next_value = last_value
+        for t in reversed(range(self.rollout_length)):
+            next_non_terminal = 1.0 - self.dones[t]
+            delta = self.rewards[t] + gamma * next_value * next_non_terminal - self.values[t]
+            gae = delta + gamma * gae_lambda * next_non_terminal * gae
+            advantages[t] = gae
+            next_value = self.values[t]
+        returns = advantages + self.values
+        return returns, advantages
 
 
 # ---------------------------------------------------------------------------
@@ -145,8 +166,54 @@ def ppo_update(policy: DensePolicy,
 
     Returns a dict of mean losses for logging.
     """
-    # TODO: Implement PPO minibatch updates over ppo_epochs.
-    return {}
+    obs = buffer.obs
+    actions = buffer.actions
+    old_log_probs = buffer.log_probs.detach()
+
+    advantages = (advantages - advantages.mean()) / (advantages.std() + 1e-8)
+
+    n = buffer.rollout_length
+    total_policy_loss = 0.0
+    total_value_loss = 0.0
+    total_entropy = 0.0
+    n_updates = 0
+
+    for _ in range(cfg.training.ppo_epochs):
+        perm = torch.randperm(n, device=buffer.device)
+        for start in range(0, n, cfg.training.minibatch_size):
+            mb_idx = perm[start:start + cfg.training.minibatch_size]
+
+            dist = policy.forward(obs[mb_idx])
+            new_log_probs = dist.log_prob(actions[mb_idx]).sum(-1)
+            entropy = dist.entropy().sum(-1).mean()
+
+            ratio = (new_log_probs - old_log_probs[mb_idx]).exp()
+            mb_adv = advantages[mb_idx]
+            surr1 = ratio * mb_adv
+            surr2 = ratio.clamp(1 - cfg.training.clip_eps, 1 + cfg.training.clip_eps) * mb_adv
+            policy_loss = -torch.min(surr1, surr2).mean()
+
+            value_loss = F.mse_loss(value_fn(obs[mb_idx]), returns[mb_idx])
+
+            loss = policy_loss + cfg.training.vf_coef * value_loss - cfg.training.ent_coef * entropy
+            optimizer.zero_grad()
+            loss.backward()
+            nn.utils.clip_grad_norm_(
+                list(policy.parameters()) + list(value_fn.parameters()),
+                cfg.training.max_grad_norm,
+            )
+            optimizer.step()
+
+            total_policy_loss += policy_loss.item()
+            total_value_loss += value_loss.item()
+            total_entropy += entropy.item()
+            n_updates += 1
+
+    return {
+        "policy_loss": total_policy_loss / n_updates,
+        "value_loss": total_value_loss / n_updates,
+        "entropy": total_entropy / n_updates,
+    }
 
 
 # ---------------------------------------------------------------------------
