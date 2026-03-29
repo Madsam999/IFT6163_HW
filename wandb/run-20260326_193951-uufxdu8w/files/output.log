@@ -1,0 +1,46 @@
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[Warning]: datasets path /opt/LIBERO/libero/libero/../datasets does not exist!
+Traceback (most recent call last):
+  File "/project/60004/samuel/IFT6163_HW/hw3/train_dense_rl.py", line 381, in <module>
+    main()
+  File "/opt/conda/envs/roble/lib/python3.10/site-packages/hydra/main.py", line 90, in decorated_main
+    _run_hydra(
+  File "/opt/conda/envs/roble/lib/python3.10/site-packages/hydra/_internal/utils.py", line 389, in _run_hydra
+    _run_app(
+  File "/opt/conda/envs/roble/lib/python3.10/site-packages/hydra/_internal/utils.py", line 452, in _run_app
+    run_and_report(
+  File "/opt/conda/envs/roble/lib/python3.10/site-packages/hydra/_internal/utils.py", line 213, in run_and_report
+    return func()
+  File "/opt/conda/envs/roble/lib/python3.10/site-packages/hydra/_internal/utils.py", line 453, in <lambda>
+    lambda: hydra.run(
+  File "/opt/conda/envs/roble/lib/python3.10/site-packages/hydra/_internal/hydra.py", line 119, in run
+    ret = run_job(
+  File "/opt/conda/envs/roble/lib/python3.10/site-packages/hydra/core/utils.py", line 186, in run_job
+    ret.return_value = task_function(task_cfg)
+  File "/project/60004/samuel/IFT6163_HW/hw3/train_dense_rl.py", line 254, in main
+    env = FastLIBEROEnv(
+  File "/project/60004/samuel/IFT6163_HW/hw3/../hw3/libero_env_fast.py", line 56, in __init__
+    self.env = DenseRewardEnv(
+  File "/opt/LIBERO/libero/libero/envs/env_wrapper.py", line 286, in __init__
+    super().__init__(**kwargs)
+  File "/opt/LIBERO/libero/libero/envs/env_wrapper.py", line 161, in __init__
+    super().__init__(**kwargs)
+  File "/opt/LIBERO/libero/libero/envs/env_wrapper.py", line 56, in __init__
+    self.env = TASK_MAPPING[self.problem_name](
+  File "/opt/LIBERO/libero/libero/envs/problems/libero_tabletop_manipulation.py", line 40, in __init__
+    super().__init__(bddl_file_name, *args, **kwargs)
+  File "/opt/LIBERO/libero/libero/envs/bddl_base_domain.py", line 135, in __init__
+    super().__init__(
+  File "/opt/conda/envs/roble/lib/python3.10/site-packages/robosuite/environments/manipulation/manipulation_env.py", line 162, in __init__
+    super().__init__(
+  File "/opt/conda/envs/roble/lib/python3.10/site-packages/robosuite/environments/robot_env.py", line 214, in __init__
+    super().__init__(
+  File "/opt/conda/envs/roble/lib/python3.10/site-packages/robosuite/environments/base.py", line 137, in __init__
+    self._initialize_sim()
+  File "/opt/conda/envs/roble/lib/python3.10/site-packages/robosuite/environments/base.py", line 230, in _initialize_sim
+    self.sim = MjSim.from_xml_string(xml)
+  File "/opt/conda/envs/roble/lib/python3.10/site-packages/robosuite/utils/binding_utils.py", line 1072, in from_xml_string
+    model = mujoco.MjModel.from_xml_string(xml)
+  File "/opt/conda/envs/roble/lib/python3.10/site-packages/numpy/lib/_version.py", line 55, in __init__
+    def __init__(self, vstring):
+KeyboardInterrupt

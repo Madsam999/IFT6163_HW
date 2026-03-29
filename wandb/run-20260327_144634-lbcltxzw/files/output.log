@@ -1,0 +1,21 @@
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[Warning]: datasets path /opt/LIBERO/libero/libero/../datasets does not exist!
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+Error executing job with overrides: ['experiment.name=hw3_transformer_ppo_seed0', 'r_seed=0', 'init_checkpoint=hw3/miniGRP_Model/miniGRP.pth', 'rl.algorithm=ppo', 'sim.task_set=libero_spatial', 'sim.eval_tasks=[9]']
+Traceback (most recent call last):
+  File "/project/60004/samuel/IFT6163_HW/hw3/train_transformer_rl.py", line 438, in main
+    policy = TransformerPolicyWrapper(cfg.init_checkpoint, device, cfg)
+  File "/project/60004/samuel/IFT6163_HW/hw3/train_transformer_rl.py", line 79, in __init__
+    self.model = torch.load(checkpoint_path, map_location=device, pickle_module=dill)
+  File "/opt/conda/envs/roble/lib/python3.10/site-packages/torch/serialization.py", line 1360, in load
+    return _load(
+  File "/opt/conda/envs/roble/lib/python3.10/site-packages/torch/serialization.py", line 1848, in _load
+    result = unpickler.load()
+  File "/opt/conda/envs/roble/lib/python3.10/site-packages/dill/_dill.py", line 452, in load
+    obj = StockUnpickler.load(self)
+  File "/opt/conda/envs/roble/lib/python3.10/site-packages/torch/serialization.py", line 1837, in find_class
+    return super().find_class(mod_name, name)
+  File "/opt/conda/envs/roble/lib/python3.10/site-packages/dill/_dill.py", line 442, in find_class
+    return StockUnpickler.find_class(self, module, name)
+AttributeError: Can't get attribute 'GRP' on <module 'grp_model' from '/project/60004/samuel/IFT6163_HW/hw3/grp_model.py'>
+Set the environment variable HYDRA_FULL_ERROR=1 for a complete stack trace.

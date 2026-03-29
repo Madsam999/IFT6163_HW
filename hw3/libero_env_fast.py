@@ -167,34 +167,22 @@ class FastLIBEROEnv:
         Expects the same layout as _get_obs:
             [qpos(7), bowl_rel_to_gripper(3), plate_rel_to_gripper(3), ...padding]
         """
-        bowl_rel = state[7:10]
+        bowl_rel = state[7:10]    # bowl_pos - eef_pos
+        plate_rel = state[10:13]  # plate_pos - eef_pos
 
-        # Distance: gripper to bowl from relative position
+        # Term 1: gripper → bowl (reach the bowl)
         reward_gripper_bowl = -np.linalg.norm(bowl_rel)
-        # reward_gripper_bowl = np.exp(-dist_gripper_bowl * dist_gripper_bowl * 10.0)
 
-        # Distance: gripper to plate from relative position
-        plate_rel = state[10:13]
-        reward_gripper_plate = - np.linalg.norm(plate_rel)
-        # reward_gripper_plate = np.exp(-dist_gripper_plate * dist_gripper_plate * 10.0)
+        # Term 2: bowl → plate (bowl near the plate)
+        bowl_to_plate = bowl_rel - plate_rel  # = bowl_pos - plate_pos
+        reward_bowl_plate = -np.linalg.norm(bowl_to_plate)
 
-        # # Height proxy from observation-only state (relative z)
-        # height_reward = max(0, min(1.0, (bowl_rel[2] + 0.05) * 10))
-
-        # # Bowl movement penalty from consecutive observation states
-        # bowl_movement_penalty = 0.0
-        # if self.prev_bowl_rel is not None:
-        #     bowl_movement = np.linalg.norm(bowl_rel - self.prev_bowl_rel)
-        #     bowl_movement_penalty = -0.1 * bowl_movement
-
-        # Scale: 85% gripper->bowl, 10% height, -5% bowl movement penalty
-        # reward = 0.85 * reward_gripper_bowl # + 0.15 * reward_gripper_plate  # + 0.1 * height_reward + bowl_movement_penalty
-        reward = reward_gripper_plate  # + 0.1 * height_reward + bowl_movement_penalty
+        # Both terms as in the prof's example (equal weight)
+        reward = (reward_gripper_bowl + reward_bowl_plate) * 0.1
 
         reward_info = {
             'reward_gripper_bowl': float(reward_gripper_bowl),
-            # 'reward_height': height_reward,
-            # 'bowl_movement_penalty': bowl_movement_penalty,
+            'reward_bowl_plate': float(reward_bowl_plate),
         }
 
         return reward, reward_info

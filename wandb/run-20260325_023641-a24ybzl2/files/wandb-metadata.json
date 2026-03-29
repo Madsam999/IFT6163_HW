@@ -1,0 +1,33 @@
+{
+    "os": "Linux-5.14.0-570.33.2.el9_6.x86_64-x86_64-with-glibc2.35",
+    "python": "3.10.19",
+    "heartbeatAt": "2026-03-25T02:36:45.311231",
+    "startedAt": "2026-03-25T02:36:41.583602",
+    "docker": null,
+    "gpu": "NVIDIA A100-SXM4-40GB",
+    "gpu_count": 1,
+    "cpu_count": 12,
+    "cuda": null,
+    "args": [
+        "experiment.name=hw3_dense_ppo_seed0_v4",
+        "r_seed=0",
+        "sim.task_set=libero_spatial",
+        "sim.eval_tasks=[9]",
+        "training.total_env_steps=200000",
+        "training.rollout_length=256",
+        "training.ppo_epochs=4",
+        "training.minibatch_size=64"
+    ],
+    "state": "running",
+    "program": "/project/60004/samuel/IFT6163_HW/hw3/train_dense_rl.py",
+    "codePath": "hw3/train_dense_rl.py",
+    "git": {
+        "remote": "https://github.com/Madsam999/IFT6163_HW.git",
+        "commit": "78c801b60eedbacfd9e30cdb5d90f9a5cf21241f"
+    },
+    "email": "samuelfournier06@gmail.com",
+    "root": "/project/60004/samuel/IFT6163_HW",
+    "host": "nodegpupool3.int.ift6163.calculquebec.cloud",
+    "username": "samuel",
+    "executable": "/opt/conda/envs/roble/bin/python"
+}

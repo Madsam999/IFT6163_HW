@@ -1,0 +1,25 @@
+2026-03-26 17:32:34,194 INFO    MainThread:14504 [wandb_setup.py:_flush():76] Configure stats pid to 14504
+2026-03-26 17:32:34,194 INFO    MainThread:14504 [wandb_setup.py:_flush():76] Loading settings from /home/samuel/.config/wandb/settings
+2026-03-26 17:32:34,194 INFO    MainThread:14504 [wandb_setup.py:_flush():76] Loading settings from /project/60004/samuel/IFT6163_HW/wandb/settings
+2026-03-26 17:32:34,194 INFO    MainThread:14504 [wandb_setup.py:_flush():76] Loading settings from environment variables: {'api_key': '***REDACTED***', '_require_service': 'True'}
+2026-03-26 17:32:34,194 INFO    MainThread:14504 [wandb_setup.py:_flush():76] Inferring run settings from compute environment: {'program_relpath': 'hw3/train_dense_rl.py', 'program': '/project/60004/samuel/IFT6163_HW/hw3/train_dense_rl.py'}
+2026-03-26 17:32:34,194 INFO    MainThread:14504 [wandb_init.py:_log_setup():461] Logging user logs to /project/60004/samuel/IFT6163_HW/wandb/run-20260326_173234-r3lbdh4b/logs/debug.log
+2026-03-26 17:32:34,194 INFO    MainThread:14504 [wandb_init.py:_log_setup():462] Logging internal logs to /project/60004/samuel/IFT6163_HW/wandb/run-20260326_173234-r3lbdh4b/logs/debug-internal.log
+2026-03-26 17:32:34,194 INFO    MainThread:14504 [wandb_init.py:init():495] calling init triggers
+2026-03-26 17:32:34,194 INFO    MainThread:14504 [wandb_init.py:init():498] wandb.init called with sweep_config: {}
+config: {'experiment': {'name': 'hw3_dense_ppo_seed0_v10', 'project': 'mini-grp-hw3', 'description': 'Dense MLP policy trained with PPO on privileged state'}, 'r_seed': 0, 'sim': {'task_set': 'libero_spatial', 'eval_tasks': [9], 'eval_episodes': 5, 'episode_length': 300, 'use_fast_env': True}, 'training': {'total_env_steps': 200000, 'rollout_length': 128, 'ppo_epochs': 10, 'minibatch_size': 256, 'gamma': 0.99, 'gae_lambda': 0.95, 'clip_eps': 0.2, 'value_coeff': 0.5, 'entropy_coeff': 0.01, 'max_grad_norm': 0.5, 'learning_rate': 0.0003, 'normalize_advantages': True, 'normalize_rewards': False}, 'policy': {'obs_dim': 13, 'action_dim': 7, 'hidden_dim': 256, 'n_layers': 3}, 'eval_interval': 10000, 'log_interval': 1000, 'save_interval': 50000}
+2026-03-26 17:32:34,194 INFO    MainThread:14504 [wandb_init.py:init():548] starting backend
+2026-03-26 17:32:34,195 INFO    MainThread:14504 [wandb_init.py:init():552] setting up manager
+2026-03-26 17:32:34,196 INFO    MainThread:14504 [backend.py:_multiprocessing_setup():97] multiprocessing start_methods=fork,spawn,forkserver, using: spawn
+2026-03-26 17:32:34,198 INFO    MainThread:14504 [wandb_init.py:init():558] backend started and connected
+2026-03-26 17:32:34,201 INFO    MainThread:14504 [wandb_init.py:init():636] updated telemetry
+2026-03-26 17:32:34,214 INFO    MainThread:14504 [wandb_init.py:init():667] communicating run to backend with 30 second timeout
+2026-03-26 17:32:35,025 INFO    MainThread:14504 [wandb_run.py:_on_init():1982] communicating current version
+2026-03-26 17:32:35,123 INFO    MainThread:14504 [wandb_run.py:_on_init():1986] got version response upgrade_message: "wandb version 0.25.1 is available!  To upgrade, please run:\n $ pip install wandb --upgrade"
+
+2026-03-26 17:32:35,123 INFO    MainThread:14504 [wandb_init.py:init():700] starting run threads in backend
+2026-03-26 17:32:36,032 INFO    MainThread:14504 [wandb_run.py:_console_start():1962] atexit reg
+2026-03-26 17:32:36,032 INFO    MainThread:14504 [wandb_run.py:_redirect():1820] redirect: SettingsConsole.WRAP_RAW
+2026-03-26 17:32:36,032 INFO    MainThread:14504 [wandb_run.py:_redirect():1885] Wrapping output streams.
+2026-03-26 17:32:36,032 INFO    MainThread:14504 [wandb_run.py:_redirect():1907] Redirects installed.
+2026-03-26 17:32:36,033 INFO    MainThread:14504 [wandb_init.py:init():732] run started, returning control to user process

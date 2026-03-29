@@ -69,87 +69,98 @@ class TransformerPolicyWrapper:
     """
     Wraps the HW1 GRP transformer model to provide a gym-style action interface.
 
-    The transformer policy expects a history of observations and actions;
-    this wrapper maintains the required context window internally.
+    The actual checkpoint has:
+      _parameters: class_tokens
+      _modules: token_embedding_table, lin_map, lin_map_pose, blocks, ln_f, mlp
+      attributes: input_d, patch_size, is_discrete
+
+    For RL with privileged state, we use the model's existing lin_map_pose to
+    project state → embedding, then run through [CLS, state_token] → transformer → mlp.
     """
 
-    def __init__(self, checkpoint_path: str, device: torch.device, cfg: DictConfig):
+    def __init__(self, checkpoint_path: str, device: torch.device, cfg: DictConfig,
+                 obs_dim: int = 13):
         import dill
-        # The HW1 checkpoint is saved as a full model object via torch.save(model, path, pickle_module=dill)
+        from hw3.grp_model import calc_positional_embeddings
+        self.calc_positional_embeddings = calc_positional_embeddings
+
         self.model = torch.load(checkpoint_path, map_location=device, pickle_module=dill)
         self.model.to(device)
-        self.model.eval()
+        self.model.train()
         self.device = device
         self.cfg = cfg
-        self._context = []
-        # Register a learnable log_std on the model itself so it appears in model.parameters()
-        # and is saved/loaded with the checkpoint naturally.
         action_dim = cfg.policy.action_dim
+
+        # Determine embedding dimension from the CLS token shape
+        self.n_embd = self.model.class_tokens.shape[-1]
+
+        # Learnable log_std for the RL Gaussian policy
         self.model.rl_log_std = nn.Parameter(torch.zeros(action_dim, device=device))
 
+        # The model already has lin_map_pose for encoding state vectors.
+        # Check its input dimension — if it doesn't match obs_dim, add an adapter.
+        pose_in_dim = self.model.lin_map_pose.in_features if hasattr(self.model.lin_map_pose, 'in_features') else None
+        print(f"[INFO] Model input_d={self.n_embd}, lin_map_pose input={pose_in_dim}, obs_dim={obs_dim}")
+
+        if pose_in_dim is not None and pose_in_dim != obs_dim:
+            # Need an adapter from obs_dim to the expected pose input dim
+            self.pose_adapter = nn.Linear(obs_dim, pose_in_dim).to(device)
+        else:
+            self.pose_adapter = None
+
     def reset_context(self):
-        self._context = []
+        pass
 
     def _compute_action_mean(self, obs_t: torch.Tensor) -> torch.Tensor:
         """
-        Run the GRP model forward on a batch of state vectors and return action means.
-
-        The GRP model can operate in two modes depending on the checkpoint:
-          - Newer API: encode_pose() + forward(observations=None, ..., pose=pose, ...)
-          - Legacy API: dummy image/goal tensors + forward(images, goals, goal_imgs, pose=pose)
+        Run the GRP transformer on privileged state vectors.
+        Uses lin_map_pose to encode state, then [CLS, state] → transformer → mlp.
         """
         B = obs_t.shape[0]
-        model_cfg = self.model._cfg
+        model = self.model
         action_dim = self.cfg.policy.action_dim
 
-        if hasattr(self.model, 'encode_pose'):
-            # Newer GRP API: privileged-state-only mode (no images needed)
-            pose = self.model.encode_pose(obs_t.unsqueeze(1))  # (B, 1, obs_dim) -> encoded
-            out = self.model.forward(
-                observations=None, text_goal=None, goal_image=None,
-                mask_=True, pose=pose, last_action=None,
-            )
-            raw = out['actions'] if isinstance(out, dict) else (out[0] if isinstance(out, tuple) else out)
+        # Encode state through the model's pose encoder
+        if self.pose_adapter is not None:
+            pose_input = self.pose_adapter(obs_t)
         else:
-            # Legacy API: feed zeros for image/goal inputs, state as pose
-            h = model_cfg.image_shape[0]
-            w = model_cfg.image_shape[1]
-            stacking = model_cfg.policy.obs_stacking
-            dummy_img = torch.zeros(B, h, w, 3 * stacking, device=self.device)
-            dummy_goal_txt = torch.zeros(B, model_cfg.max_block_size, dtype=torch.long, device=self.device)
-            dummy_goal_img = torch.zeros(B, h, w, 3, device=self.device)
-            encoded_pose = self.model.encode_state(obs_t.unsqueeze(1))
-            out, _ = self.model.forward(dummy_img, dummy_goal_txt, dummy_goal_img, pose=encoded_pose)
-            raw = out
+            pose_input = obs_t
+        state_emb = model.lin_map_pose(pose_input).unsqueeze(1)  # (B, 1, n_embd)
 
-        decoded = self.model.decode_action(raw)  # undo action normalisation
-        # The model may predict action_stacking steps; take only the first action_dim values
-        return decoded.reshape(B, -1)[:, :action_dim]
+        # Build sequence: [CLS, state_token]
+        cls_tokens = model.class_tokens.expand(B, -1, -1)
+        x = torch.cat([cls_tokens, state_emb], dim=1)  # (B, 2, n_embd)
+
+        # Positional embeddings
+        seq_len = x.shape[1]
+        pos_emb = self.calc_positional_embeddings(seq_len, self.n_embd)
+        pos_emb = pos_emb.to(self.device)
+        x = x + pos_emb.unsqueeze(0)
+
+        # Transformer blocks
+        for block in model.blocks:
+            x = block(x)
+
+        x = model.ln_f(x)
+        cls_out = x[:, 0, :]
+        raw = model.mlp(cls_out)  # (B, total_action_dim)
+
+        return raw.reshape(B, -1)[:, :action_dim]
 
     def forward(self, obs: torch.Tensor):
-        """
-        Return a Normal distribution over actions for a batched obs tensor.
-        Called by ppo_update() during the gradient update step.
-        """
+        """Return a Normal distribution over actions for a batched obs tensor."""
         mean = self._compute_action_mean(obs)
-        std = self.model.rl_log_std.exp().expand_as(mean)
+        std = self.model.rl_log_std.clamp(-4, 2).exp().expand_as(mean)
         return Normal(mean, std)
 
     def get_action(self, obs: np.ndarray, deterministic: bool = False):
         """
         Query the transformer for an action given the current observation.
-
-        Args:
-            obs: (obs_dim,) numpy array
-            deterministic: if True return mean, else sample
-        Returns:
-            action: (action_dim,) numpy array
-            log_prob: scalar tensor
-            entropy: scalar tensor
+        Returns: (action_np, log_prob, entropy)
         """
         obs_t = torch.tensor(obs, dtype=torch.float32, device=self.device)
         if obs_t.dim() == 1:
-            obs_t = obs_t.unsqueeze(0)  # (1, obs_dim)
+            obs_t = obs_t.unsqueeze(0)
 
         dist = self.forward(obs_t)
 
@@ -169,7 +180,12 @@ class TransformerPolicyWrapper:
         )
 
     def parameters(self):
-        return self.model.parameters()
+        """Return all trainable parameters: GRP model + optional pose_adapter."""
+        import itertools
+        params = [self.model.parameters()]
+        if self.pose_adapter is not None:
+            params.append(self.pose_adapter.parameters())
+        return itertools.chain(*params)
 
     def train(self):
         self.model.train()
@@ -196,7 +212,15 @@ def collect_grpo_group(env: FastLIBEROEnv,
     """
     trajectories = []
     for _ in range(group_size):
-        obs, info = env.reset(options={"init_state": init_state})
+        # Reset env, then restore the exact MuJoCo SimState so all group members
+        # start from identical initial conditions (ground-truth reset for GRPO).
+        env.env.reset()
+        env.env.sim.set_state(init_state)
+        env.env.sim.forward()
+        env.current_step = 0
+        # Get the initial observation after the state restore
+        obs_dict = env.env.step([0, 0, 0, 0, 0, 0, -1])[0]  # one settle step
+        obs = env._get_state_obs(obs_dict)
         policy.reset_context()
 
         traj = {
@@ -277,7 +301,7 @@ def grpo_update(policy: TransformerPolicyWrapper,
             clip_eps = cfg.training.clip_eps
             surr1 = ratio * adv_t
             surr2 = ratio.clamp(1 - clip_eps, 1 + clip_eps) * adv_t
-            policy_loss = -torch.min(surr1, surr2).mean() - cfg.training.ent_coef * entropy
+            policy_loss = -torch.min(surr1, surr2).mean() - cfg.training.entropy_coeff * entropy
 
             policy_optimizer.zero_grad()
             policy_loss.backward()
@@ -435,7 +459,7 @@ def main(cfg: DictConfig):
     action_dim = env._action_dim
 
     # Load transformer policy from HW1 checkpoint
-    policy = TransformerPolicyWrapper(cfg.init_checkpoint, device, cfg)
+    policy = TransformerPolicyWrapper(cfg.init_checkpoint, device, cfg, obs_dim=obs_dim)
 
     # Separate value function (required by hw3.md)
     value_fn = ValueFunction(obs_dim, cfg.value.hidden_dim, cfg.value.n_layers).to(device)
@@ -450,10 +474,6 @@ def main(cfg: DictConfig):
         # PPO loop (reuses the buffer + update from Part 1)
         # ------------------------------------------------------------------
         buffer = RolloutBuffer(cfg.training.rollout_length, obs_dim, action_dim, device)
-        optimizer = torch.optim.Adam(
-            list(policy.parameters()) + list(value_fn.parameters()),
-            lr=cfg.training.learning_rate,
-        )
 
         obs, _ = env.reset()
         policy.reset_context()
@@ -495,7 +515,7 @@ def main(cfg: DictConfig):
             returns, advantages = buffer.compute_returns_and_advantages(
                 last_value, cfg.training.gamma, cfg.training.gae_lambda
             )
-            update_info = ppo_update(policy, value_fn, optimizer, buffer, returns, advantages, cfg)
+            update_info = ppo_update(policy, value_fn, policy_optimizer, value_optimizer, buffer, returns, advantages, cfg)
 
             if total_steps % cfg.log_interval < cfg.training.rollout_length:
                 log = {"train/total_steps": total_steps, **{f"train/{k}": v for k, v in update_info.items()}}
@@ -519,12 +539,14 @@ def main(cfg: DictConfig):
             # (2) snapshot that state, (3) re-run the policy group_size times from
             # the exact same snapshot so GRPO can compare within-group outcomes.
             trajectories_per_group = []
-            for _ in range(cfg.rl.num_groups):
+            for _ in range(cfg.grpo.num_groups):
                 env.reset()  # randomise initial state
-                init_state = env.env.sim.get_state()  # MuJoCo SimState snapshot
+                # Snapshot the MuJoCo state so all group members start identically
+                sim = env.env.sim
+                init_state = sim.get_state()
                 group = collect_grpo_group(
                     env, policy, init_state,
-                    cfg.rl.group_size, cfg.sim.episode_length, device,
+                    cfg.grpo.group_size, cfg.sim.episode_length, device,
                 )
                 trajectories_per_group.append(group)
                 total_steps += sum(len(t["obs"]) for t in group)

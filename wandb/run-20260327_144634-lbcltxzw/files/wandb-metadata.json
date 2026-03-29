@@ -1,0 +1,31 @@
+{
+    "os": "Linux-5.14.0-570.33.2.el9_6.x86_64-x86_64-with-glibc2.35",
+    "python": "3.10.19",
+    "heartbeatAt": "2026-03-27T14:46:35.499741",
+    "startedAt": "2026-03-27T14:46:34.664288",
+    "docker": null,
+    "gpu": "NVIDIA A100-SXM4-40GB",
+    "gpu_count": 1,
+    "cpu_count": 12,
+    "cuda": null,
+    "args": [
+        "experiment.name=hw3_transformer_ppo_seed0",
+        "r_seed=0",
+        "init_checkpoint=hw3/miniGRP_Model/miniGRP.pth",
+        "rl.algorithm=ppo",
+        "sim.task_set=libero_spatial",
+        "sim.eval_tasks=[9]"
+    ],
+    "state": "running",
+    "program": "/project/60004/samuel/IFT6163_HW/hw3/train_transformer_rl.py",
+    "codePath": "hw3/train_transformer_rl.py",
+    "git": {
+        "remote": "https://github.com/Madsam999/IFT6163_HW.git",
+        "commit": "78c801b60eedbacfd9e30cdb5d90f9a5cf21241f"
+    },
+    "email": "samuelfournier06@gmail.com",
+    "root": "/project/60004/samuel/IFT6163_HW",
+    "host": "nodegpupool2.int.ift6163.calculquebec.cloud",
+    "username": "samuel",
+    "executable": "/opt/conda/envs/roble/bin/python"
+}

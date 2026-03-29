@@ -1,0 +1,23 @@
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[Warning]: datasets path /opt/LIBERO/libero/libero/../datasets does not exist!
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[DEBUG] Loaded checkpoint type: <class 'grp_model.GRP'>
+[DEBUG] Module attributes: ['training', 'patch_size', 'input_d', 'is_discrete']
+[DEBUG] Module _parameters: ['class_tokens']
+[DEBUG] Module _modules: ['token_embedding_table', 'lin_map', 'lin_map_pose', 'blocks', 'ln_f', 'mlp']
+/opt/conda/envs/roble/lib/python3.10/site-packages/wandb/sdk/lib/import_hooks.py:246: DeprecationWarning: Deprecated since Python 3.4 and slated for removal in Python 3.12; use importlib.util.find_spec() instead
+  loader = importlib.find_loader(fullname, path)
+Error executing job with overrides: ['experiment.name=hw3_transformer_ppo_seed0', 'r_seed=0', 'init_checkpoint=hw3/miniGRP_Model/miniGRP.pth', 'rl.algorithm=ppo', 'sim.task_set=libero_spatial', 'sim.eval_tasks=[9]']
+Traceback (most recent call last):
+  File "/project/60004/samuel/IFT6163_HW/hw3/train_transformer_rl.py", line 478, in main
+    action_np, log_prob, _ = policy.get_action(obs)
+  File "/project/60004/samuel/IFT6163_HW/hw3/train_transformer_rl.py", line 161, in get_action
+    dist = self.forward(obs_t)
+  File "/project/60004/samuel/IFT6163_HW/hw3/train_transformer_rl.py", line 148, in forward
+    mean = self._compute_action_mean(obs)
+  File "/project/60004/samuel/IFT6163_HW/hw3/train_transformer_rl.py", line 124, in _compute_action_mean
+    cls_tokens = model.cls_token.expand(B, -1, -1)
+  File "/opt/conda/envs/roble/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1931, in __getattr__
+    raise AttributeError(
+AttributeError: 'GRP' object has no attribute 'cls_token'
+Set the environment variable HYDRA_FULL_ERROR=1 for a complete stack trace.

@@ -1,0 +1,108 @@
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[Warning]: datasets path /opt/LIBERO/libero/libero/../datasets does not exist!
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+/opt/conda/envs/roble/lib/python3.10/site-packages/wandb/sdk/lib/import_hooks.py:246: DeprecationWarning: Deprecated since Python 3.4 and slated for removal in Python 3.12; use importlib.util.find_spec() instead
+  loader = importlib.find_loader(fullname, path)
+[1024/200000] return=-89.540 policy_loss=-0.0306
+[2048/200000] return=-87.607 policy_loss=-0.0344
+[3072/200000] return=-117.012 policy_loss=-0.0382
+[4096/200000] return=-180.498 policy_loss=-0.0502
+[5120/200000] return=-232.071 policy_loss=-0.0306
+[6016/200000] return=-263.438 policy_loss=-0.0137
+[7040/200000] return=-248.249 policy_loss=-0.0181
+[8064/200000] return=-246.020 policy_loss=-0.0144
+[9088/200000] return=-230.998 policy_loss=-0.0338
+[10112/200000] return=-244.424 policy_loss=-0.1060
+[11008/200000] return=-244.707 policy_loss=-0.0368
+[12032/200000] return=-267.352 policy_loss=-0.1126
+[13056/200000] return=-262.668 policy_loss=-0.0400
+[14080/200000] return=-287.624 policy_loss=-0.0857
+[15104/200000] return=-287.560 policy_loss=-0.0885
+[16000/200000] return=-287.805 policy_loss=-0.0957
+[17024/200000] return=-266.331 policy_loss=-0.1350
+[18048/200000] return=-258.849 policy_loss=-0.0421
+[19072/200000] return=-266.285 policy_loss=-0.0718
+[20096/200000] return=-294.243 policy_loss=2.7739
+[21120/200000] return=-298.006 policy_loss=-0.0768
+[22016/200000] return=-311.671 policy_loss=-0.1131
+[23040/200000] return=-303.673 policy_loss=-0.0223
+[24064/200000] return=-311.709 policy_loss=0.1904
+[25088/200000] return=-295.908 policy_loss=-0.0697
+[26112/200000] return=-296.173 policy_loss=-0.0232
+[27008/200000] return=-290.541 policy_loss=-0.0618
+[28032/200000] return=-256.367 policy_loss=-0.0390
+[29056/200000] return=-228.273 policy_loss=-0.0183
+[30080/200000] return=-231.392 policy_loss=-0.0084
+[31104/200000] return=-257.137 policy_loss=0.2104
+[32000/200000] return=-269.151 policy_loss=-0.1051
+[33024/200000] return=-250.604 policy_loss=-0.1246
+[34048/200000] return=-241.478 policy_loss=0.1368
+[35072/200000] return=-232.523 policy_loss=-0.0400
+[36096/200000] return=-221.776 policy_loss=-0.0557
+[37120/200000] return=-197.303 policy_loss=0.0773
+[38016/200000] return=-162.187 policy_loss=0.0516
+[39040/200000] return=-124.826 policy_loss=0.4962
+[40064/200000] return=-126.710 policy_loss=-0.1153
+[41088/200000] return=-173.545 policy_loss=0.0150
+[42112/200000] return=-169.614 policy_loss=0.0578
+[43008/200000] return=-150.849 policy_loss=0.2068
+[44032/200000] return=-149.783 policy_loss=0.1030
+[45056/200000] return=-201.117 policy_loss=0.0268
+[46080/200000] return=-264.159 policy_loss=0.1606
+[47104/200000] return=-261.317 policy_loss=0.3091
+[48000/200000] return=-261.874 policy_loss=0.2682
+[49024/200000] return=-258.065 policy_loss=-0.0426
+[50048/200000] return=-285.130 policy_loss=-0.0824
+[51072/200000] return=-311.883 policy_loss=-0.0582
+[52096/200000] return=-319.716 policy_loss=0.2583
+[53120/200000] return=-326.767 policy_loss=0.0106
+[54016/200000] return=-326.553 policy_loss=0.0317
+[55040/200000] return=-317.560 policy_loss=-0.0988
+Traceback (most recent call last):
+  File "/project/60004/samuel/IFT6163_HW/hw3/train_dense_rl.py", line 356, in <module>
+    main()
+  File "/opt/conda/envs/roble/lib/python3.10/site-packages/hydra/main.py", line 90, in decorated_main
+    _run_hydra(
+  File "/opt/conda/envs/roble/lib/python3.10/site-packages/hydra/_internal/utils.py", line 389, in _run_hydra
+    _run_app(
+  File "/opt/conda/envs/roble/lib/python3.10/site-packages/hydra/_internal/utils.py", line 452, in _run_app
+    run_and_report(
+  File "/opt/conda/envs/roble/lib/python3.10/site-packages/hydra/_internal/utils.py", line 213, in run_and_report
+    return func()
+  File "/opt/conda/envs/roble/lib/python3.10/site-packages/hydra/_internal/utils.py", line 453, in <lambda>
+    lambda: hydra.run(
+  File "/opt/conda/envs/roble/lib/python3.10/site-packages/hydra/_internal/hydra.py", line 119, in run
+    ret = run_job(
+  File "/opt/conda/envs/roble/lib/python3.10/site-packages/hydra/core/utils.py", line 186, in run_job
+    ret.return_value = task_function(task_cfg)
+  File "/project/60004/samuel/IFT6163_HW/hw3/train_dense_rl.py", line 286, in main
+    next_obs, reward, done, truncated, info = env.step(action_np)
+  File "/project/60004/samuel/IFT6163_HW/hw3/../hw3/libero_env_fast.py", line 253, in step
+    try:
+  File "/opt/LIBERO/libero/libero/envs/env_wrapper.py", line 88, in step
+    return self.env.step(action)
+  File "/opt/LIBERO/libero/libero/envs/bddl_base_domain.py", line 809, in step
+    obs, reward, done, info = super().step(action)
+  File "/opt/conda/envs/roble/lib/python3.10/site-packages/robosuite/environments/base.py", line 398, in step
+    reward, done, info = self._post_action(action)
+  File "/opt/LIBERO/libero/libero/envs/bddl_base_domain.py", line 818, in _post_action
+    reward, done, info = super()._post_action(action)
+  File "/opt/conda/envs/roble/lib/python3.10/site-packages/robosuite/environments/base.py", line 426, in _post_action
+    reward = self.reward(action)
+  File "/opt/LIBERO/libero/libero/envs/env_wrapper.py", line 293, in _dense_reward
+    result = self.env._eval_predicate(state)
+  File "/opt/LIBERO/libero/libero/envs/problems/libero_tabletop_manipulation.py", line 151, in _eval_predicate
+    return eval_predicate_fn(
+  File "/opt/LIBERO/libero/libero/envs/predicates/__init__.py", line 27, in eval_predicate_fn
+    return VALIDATE_PREDICATE_FN_DICT[predicate_fn_name](*args)
+  File "/opt/LIBERO/libero/libero/envs/predicates/base_predicates.py", line 64, in __call__
+    return arg2.check_ontop(arg1)
+  File "/opt/LIBERO/libero/libero/envs/object_states/base_object_states.py", line 89, in check_ontop
+    and self.check_contact(other)
+  File "/opt/LIBERO/libero/libero/envs/object_states/base_object_states.py", line 57, in check_contact
+    return self.env.check_contact(object_1, object_2)
+  File "/opt/conda/envs/roble/lib/python3.10/site-packages/robosuite/environments/base.py", line 586, in check_contact
+    c2_in_g2 = self.sim.model.geom_id2name(contact.geom2) in geoms_2 if geoms_2 is not None else True
+  File "/opt/conda/envs/roble/lib/python3.10/site-packages/robosuite/utils/binding_utils.py", line 384, in geom_id2name
+    def geom_id2name(self, id):
+KeyboardInterrupt

@@ -1,0 +1,13 @@
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[Warning]: datasets path /opt/LIBERO/libero/libero/../datasets does not exist!
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+Error executing job with overrides: ['experiment.name=hw3_transformer_ppo_seed0', 'r_seed=0', 'init_checkpoint=hw3/miniGRP_Model/miniGRP.pth', 'rl.algorithm=ppo', 'sim.task_set=libero_spatial', 'sim.eval_tasks=[9]']
+Traceback (most recent call last):
+  File "/project/60004/samuel/IFT6163_HW/hw3/train_transformer_rl.py", line 437, in main
+    policy = TransformerPolicyWrapper(cfg.init_checkpoint, device, cfg, obs_dim=obs_dim)
+  File "/project/60004/samuel/IFT6163_HW/hw3/train_transformer_rl.py", line 89, in __init__
+    n_embd = self.model.n_embd
+  File "/opt/conda/envs/roble/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1931, in __getattr__
+    raise AttributeError(
+AttributeError: 'GRP' object has no attribute 'n_embd'
+Set the environment variable HYDRA_FULL_ERROR=1 for a complete stack trace.

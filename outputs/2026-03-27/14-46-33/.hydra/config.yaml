@@ -1,0 +1,39 @@
+experiment:
+  name: hw3_transformer_ppo_seed0
+  project: mini-grp-hw3
+  description: Transformer policy fine-tuned from HW1 checkpoint with RL
+r_seed: 0
+init_checkpoint: hw3/miniGRP_Model/miniGRP.pth
+rl:
+  algorithm: ppo
+sim:
+  task_set: libero_spatial
+  eval_tasks:
+  - 9
+  eval_episodes: 5
+  episode_length: 300
+  use_fast_env: true
+training:
+  total_env_steps: 200000
+  rollout_length: 128
+  ppo_epochs: 10
+  minibatch_size: 64
+  gamma: 0.99
+  gae_lambda: 0.95
+  clip_eps: 0.2
+  value_coeff: 0.5
+  entropy_coeff: 0.01
+  max_grad_norm: 0.5
+  learning_rate: 1.0e-05
+  normalize_advantages: true
+  normalize_rewards: false
+grpo:
+  group_size: 8
+  num_groups: 16
+value:
+  hidden_dim: 256
+  n_layers: 2
+  learning_rate: 0.0003
+eval_interval: 10000
+log_interval: 1000
+save_interval: 50000

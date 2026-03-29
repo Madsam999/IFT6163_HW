@@ -36,12 +36,17 @@ class Head(nn.Module):
 
     def forward(self, x, mask=None):
         B,T,C = x.shape
-        # TODO: 
+        # TODONE: 
         ## Provide the block masking logic for the attention head
         k = self.key(x)
         q = self.query(x)
         wei = q @ k.transpose(-2,-1) * C**-0.5
-        wei = wei.masked_fill(mask == 0, float('-inf'))
+        if mask is not None:
+          if mask.dim() == 1:
+            wei = wei.masked_fill(mask.unsqueeze(0).unsqueeze(1) == 0, float('-inf')) 
+          else:
+            wei = wei.masked_fill(mask == 0, float('-inf'))
+        #wei = wei.masked_fill(mask == 0, float('-inf'))
         wei = F.softmax(wei, dim=-1)
         wei = self.dropout(wei)
         v = self.value(x)
@@ -98,7 +103,35 @@ class GRP(nn.Module):
         self._cfg = cfg
         chars = cfg.dataset.chars_list
         cfg.vocab_size = len(chars)
-        # TODO: 
+
+        self.n_embd = cfg.n_embd
+        self.patch_size = cfg.patch_size
+
+        patch_dim = self.patch_size * self.patch_size * 3
+        self.patch_embedding = nn.Linear(patch_dim, self.n_embd)
+        self.cls_token = nn.Parameter(torch.randn(1, 1, self.n_embd) * 0.02)
+
+        if not self._cfg.dataset.encode_with_t5:
+          self.token_embedding_table = nn.Embedding(cfg.vocab_size, self.n_embd)
+
+        self.blocks = nn.Sequential(*[
+          Block(self.n_embd, n_head=cfg.n_head, dropout=cfg.dropout) 
+          for _ in range(cfg.n_blocks)
+        ])
+
+        self.ln_f = nn.LayerNorm(self.n_embd)
+
+        self.action_space_type = getattr(cfg.policy, 'action_space_type', 'continuous')
+        self.total_action_dim = cfg.action_dim * cfg.policy.action_stacking
+
+        if self.action_space_type == 'discrete':
+            self.n_bins = 14
+            self.head = nn.Linear(self.n_embd, self.total_action_dim * self.n_bins)
+        else:
+            self.head = nn.Linear(self.n_embd, self.total_action_dim)
+
+        self.apply(self._init_weights)
+        # TODONE: 
         ## Provide the logic for the GRP network
 
         # 4) Transformer encoder blocks
@@ -113,35 +146,60 @@ class GRP(nn.Module):
         elif isinstance(module, nn.Embedding):
             torch.nn.init.normal_(module.weight, mean=0.0, std=0.02)
 
-    def forward(self, images, goals_txt, goal_imgs, targets=None, pose=None, mask_=False, last_action=None):
+    def forward(self, images, goals_txt, goal_imgs, targets=None, pose=None, mask_=False):
         n, c, h, w = images.shape
+        device = images.device 
+        
         obs_patches = get_patches_fast(images, self._cfg)
+        obs_emb = self.patch_embedding(obs_patches) 
+        
         patches_g = get_patches_fast(goal_imgs, self._cfg)
+        goal_img_emb = self.patch_embedding(patches_g)
+        
         if self._cfg.dataset.encode_with_t5:
-            goals_e = goals_txt
-            B, T, E = goals_txt.shape
+            goals_e = goals_txt 
         else:
             goals_e = self.token_embedding_table(goals_txt)
-            B, E = goals_txt.shape
-            T = self._cfg.max_block_size
 
-        # TODO: 
-        ## Provide the logic to produce the output and loss for the GRP
-        
-        # Map the vector corresponding to each patch to the hidden size dimension
+      
+        if self.training:
+            mask_type = torch.randint(0, 3, (1,)).item() 
+            if mask_type == 0:
+                goals_e = torch.zeros_like(goals_e)
+            elif mask_type == 1:
+                goal_img_emb = torch.zeros_like(goal_img_emb)
 
-        # Adding classification and goal_img tokens to the tokens
+      
+        cls_tokens = self.cls_token.expand(n, -1, -1)
+        x = torch.cat((cls_tokens, obs_emb, goals_e, goal_img_emb), dim=1)
 
-        # Adding positional embedding
+        seq_len = x.shape[1]
+        pos_emb = calc_positional_embeddings(seq_len, self.n_embd)
+        pos_emb = pos_emb.to(x.device)
+        x += pos_emb.unsqueeze(0)
 
-        # Compute blocked masks
+        mask = None 
+        for block in self.blocks:
+            x = block(x, mask)
 
-        # Transformer Blocks
+        x = self.ln_f(x)
 
-        # Getting the classification token only
+        cls_out = x[:, 0, :]
+        logits = self.head(cls_out)
+        out = logits
 
-        # Compute output and loss
-        return (out, loss)
+        loss = None
+        if targets is not None:
+            if self.action_space_type == "discrete":
+                logits_reshaped = logits.view(n, self.total_action_dim, self.n_bins)
+                targets_norm = (targets + 1) / 2
+                targets_bin = (targets_norm * (self.n_bins - 1)).round().long()
+                targets_bin = torch.clamp(targets_bin, 0, self.n_bins - 1)
+                loss = F.cross_entropy(logits_reshaped.permute(0, 2, 1), targets_bin)
+            else:
+                loss = F.mse_loss(logits, targets)
+
+        return (out, loss) 
     
     def resize_image(self, image):
         """
@@ -179,12 +237,6 @@ class GRP(nn.Module):
 
     def preprocess_goal_image(self, image):
         return self.preprocess_state(image)
-    
-    def reset(self):
-        """
-        Reset the model's internal state if needed.
-        """
-        return None
 
     def encode_text_goal(self, goal, tokenizer=None, text_model=None):
         import numpy as _np
@@ -192,9 +244,19 @@ class GRP(nn.Module):
         if self._cfg.dataset.encode_with_t5:
             if tokenizer is None or text_model is None:
                 raise ValueError("tokenizer and text_model must be provided when using T5 encoding")
-            # TODO:    
+            # TODONE:    
             ## Provide the logic converting text goal to T5 embedding tensor
-            pass
+            with _torch.no_grad():
+                input_ids = tokenizer(goal, return_tensores="pt").input_ids.to(self._cfg.device)
+
+                outputs = text_model.encoder(input_ids=input_ids)
+                last_hidden_state = outputs.last_hidden_state
+            
+            result = _torch.zeros((1, self._cfg.max_block_size, self._cfg.n_embd), d_type=_torch.float32, device=self._cfg.device)
+            seq_length = last_hidden_state.shape[1]
+            limit = min(seq_length, self._cfg.max_block_size)
+            result[:, :limit, :] = last_hidden_state[:, :limit, :]
+            return result
         else:
             pad = " " * self._cfg.max_block_size
             goal_ = goal[:self._cfg.max_block_size] + pad[len(goal):self._cfg.max_block_size]
@@ -221,54 +283,32 @@ class GRP(nn.Module):
         return goal_
 
     def decode_action(self, action_tensor):
-        """Decode normalized actions to original action space"""
+        
+        """
+        Docstring for decode_action
+        
+        :param self: Description
+        :param action_tensor: Description
+        self._decode_action = lambda binN: (binN * action_std) + action_mean  # Undo mapping to [-1, 1]
+        """
         import torch as _torch
-        action_mean = _torch.tensor(np.repeat([self._cfg.dataset.action_mean], self._cfg.policy.action_stacking, axis=0).flatten(), 
-                                   dtype=action_tensor.dtype, device=action_tensor.device)
-        action_std = _torch.tensor(np.repeat([self._cfg.dataset.action_std], self._cfg.policy.action_stacking, axis=0).flatten(), 
-                                  dtype=action_tensor.dtype, device=action_tensor.device)
-        return (action_tensor * (action_std)) + action_mean
-
+        ## The action tensor is of shape (batch_size, action_dim * action_stacking) so we need to repeat the mean and std per action stacking
+        action_mean = _torch.tensor(np.repeat(self._cfg.dataset.action_mean, self._cfg.policy.action_stacking), dtype=action_tensor.dtype, device=action_tensor.device)
+        action_std = _torch.tensor(np.repeat(self._cfg.dataset.action_std, self._cfg.policy.action_stacking), dtype=action_tensor.dtype, device=action_tensor.device)
+        return (action_tensor * action_std) + action_mean
+    
     def encode_action(self, action_float):
-        """Encode actions to normalized space [-1, 1]"""
-        import torch as _torch
-        ## If the action_float has length greater than action_dim then use stacking otherwise just use normal standardiaztion vectors
-        if action_float.shape[1] == len(self._cfg.dataset.action_mean):
-            action_mean = _torch.tensor(self._cfg.dataset.action_mean, dtype=action_float.dtype, device=action_float.device)
-            action_std = _torch.tensor(self._cfg.dataset.action_std, dtype=action_float.dtype, device=action_float.device)
-            return (action_float - action_mean) / (action_std)  
-
-        action_mean = _torch.tensor(np.repeat([self._cfg.dataset.action_mean], self._cfg.policy.action_stacking, axis=0).flatten(), 
-                                   dtype=action_float.dtype, device=action_float.device)
-        action_std = _torch.tensor(np.repeat([self._cfg.dataset.action_std], self._cfg.policy.action_stacking, axis=0).flatten(), 
-                                  dtype=action_float.dtype, device=action_float.device)
-        return (action_float - action_mean) / (action_std)
-    
-    def decode_state(self, state_tensor):
         """
-        Docstring for decode_state
+        Docstring for encode_action
         
         :param self: Description
-        :param state_tensor: Description
-        self._decode_state = lambda sinN: (sinN * state_std) + state_mean  # Undo mapping to [-1, 1]
+        :param action_float: Description
+        self._encode_action = lambda af:   (af - action_mean)/(action_std) # encoder: take a float, output an integer
         """
         import torch as _torch
-        state_mean = _torch.tensor(self._cfg.dataset.state_mean, dtype=state_tensor.dtype, device=state_tensor.device)
-        state_std = _torch.tensor(self._cfg.dataset.state_std, dtype=state_tensor.dtype, device=state_tensor.device)
-        return (state_tensor * (state_std)) + state_mean
-    
-    def encode_state(self, state_float):
-        """
-        Docstring for encode_state
-        
-        :param self: Description
-        :param state_float: Description
-        self._encode_state = lambda sf:   (sf - state_mean)/(state_std) # encoder: take a float, output an integer
-        """
-        import torch as _torch
-        state_mean = _torch.tensor(self._cfg.dataset.state_mean, dtype=state_float.dtype, device=state_float.device)
-        state_std = _torch.tensor(self._cfg.dataset.state_std, dtype=state_float.dtype, device=state_float.device)
-        return (state_float - state_mean) / (state_std)
+        action_mean = _torch.tensor(self._cfg.dataset.action_mean, dtype=action_float.dtype, device=action_float.device)
+        action_std = _torch.tensor(self._cfg.dataset.action_std, dtype=action_float.dtype, device=action_float.device)
+        return (action_float - action_mean) / action_std
 
 
 @torch.no_grad()
@@ -278,8 +318,8 @@ def estimate_loss(model, dataset):
     for split in ['train', 'val']:
         losses = torch.zeros(model._cfg.eval_iters)
         for k in range(model._cfg.eval_iters):
-            X, x_pose, x_goal, x_goal_img, Y, last_action = dataset.get_batch_grp(split, model._cfg, model._cfg.batch_size)
-            logits, loss = model(X, x_goal, x_goal_img, Y, pose=x_pose, last_action=last_action)
+            X, x_pose, x_goal, x_goal_img, Y = dataset.get_batch_grp(split, model._cfg, model._cfg.batch_size)
+            logits, loss = model(X, x_goal, x_goal_img, Y, pose=x_pose)
             losses[k] = loss.item()
         out[split] = losses.mean()
     model.train()

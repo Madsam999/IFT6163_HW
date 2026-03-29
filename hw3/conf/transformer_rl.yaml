@@ -7,6 +7,9 @@ r_seed: 1337
 
 init_checkpoint: ???         # required: path to HW1 miniGRP.pth checkpoint
 
+policy:
+  action_dim: 7              # 7-DOF robot arm actions
+
 rl:
   algorithm: ppo             # "ppo" or "grpo"
 

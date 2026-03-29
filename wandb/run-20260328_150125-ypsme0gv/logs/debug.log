@@ -1,0 +1,138 @@
+2026-03-28 15:01:25,351 INFO    MainThread:3631 [wandb_setup.py:_flush():76] Configure stats pid to 3631
+2026-03-28 15:01:25,351 INFO    MainThread:3631 [wandb_setup.py:_flush():76] Loading settings from /home/samuel/.config/wandb/settings
+2026-03-28 15:01:25,351 INFO    MainThread:3631 [wandb_setup.py:_flush():76] Loading settings from /project/60004/samuel/IFT6163_HW/wandb/settings
+2026-03-28 15:01:25,351 INFO    MainThread:3631 [wandb_setup.py:_flush():76] Loading settings from environment variables: {'api_key': '***REDACTED***', '_require_service': 'True'}
+2026-03-28 15:01:25,351 INFO    MainThread:3631 [wandb_setup.py:_flush():76] Inferring run settings from compute environment: {'program_relpath': 'hw3/train_transformer_rl.py', 'program': '/project/60004/samuel/IFT6163_HW/hw3/train_transformer_rl.py'}
+2026-03-28 15:01:25,351 INFO    MainThread:3631 [wandb_init.py:_log_setup():461] Logging user logs to /project/60004/samuel/IFT6163_HW/wandb/run-20260328_150125-ypsme0gv/logs/debug.log
+2026-03-28 15:01:25,351 INFO    MainThread:3631 [wandb_init.py:_log_setup():462] Logging internal logs to /project/60004/samuel/IFT6163_HW/wandb/run-20260328_150125-ypsme0gv/logs/debug-internal.log
+2026-03-28 15:01:25,351 INFO    MainThread:3631 [wandb_init.py:init():495] calling init triggers
+2026-03-28 15:01:25,352 INFO    MainThread:3631 [wandb_init.py:init():498] wandb.init called with sweep_config: {}
+config: {'experiment': {'name': 'hw3_transformer_grpo_seed0', 'project': 'mini-grp-hw3', 'description': 'Transformer policy fine-tuned from HW1 checkpoint with RL'}, 'r_seed': 0, 'init_checkpoint': 'hw3/miniGRP_Model/miniGRP.pth', 'policy': {'action_dim': 7}, 'rl': {'algorithm': 'grpo'}, 'sim': {'task_set': 'libero_spatial', 'eval_tasks': [9], 'eval_episodes': 5, 'episode_length': 300, 'use_fast_env': True}, 'training': {'total_env_steps': 200000, 'rollout_length': 128, 'ppo_epochs': 10, 'minibatch_size': 64, 'gamma': 0.99, 'gae_lambda': 0.95, 'clip_eps': 0.2, 'value_coeff': 0.5, 'entropy_coeff': 0.01, 'max_grad_norm': 0.5, 'learning_rate': 1e-05, 'normalize_advantages': True, 'normalize_rewards': False}, 'grpo': {'group_size': 8, 'num_groups': 16}, 'value': {'hidden_dim': 256, 'n_layers': 2, 'learning_rate': 0.0003}, 'eval_interval': 10000, 'log_interval': 1000, 'save_interval': 50000}
+2026-03-28 15:01:25,352 INFO    MainThread:3631 [wandb_init.py:init():548] starting backend
+2026-03-28 15:01:25,352 INFO    MainThread:3631 [wandb_init.py:init():552] setting up manager
+2026-03-28 15:01:25,354 INFO    MainThread:3631 [backend.py:_multiprocessing_setup():97] multiprocessing start_methods=fork,spawn,forkserver, using: spawn
+2026-03-28 15:01:25,362 INFO    MainThread:3631 [wandb_init.py:init():558] backend started and connected
+2026-03-28 15:01:25,367 INFO    MainThread:3631 [wandb_init.py:init():636] updated telemetry
+2026-03-28 15:01:25,385 INFO    MainThread:3631 [wandb_init.py:init():667] communicating run to backend with 30 second timeout
+2026-03-28 15:01:27,269 INFO    MainThread:3631 [wandb_run.py:_on_init():1982] communicating current version
+2026-03-28 15:01:30,083 INFO    MainThread:3631 [wandb_run.py:_on_init():1986] got version response upgrade_message: "wandb version 0.25.1 is available!  To upgrade, please run:\n $ pip install wandb --upgrade"
+
+2026-03-28 15:01:30,083 INFO    MainThread:3631 [wandb_init.py:init():700] starting run threads in backend
+2026-03-28 15:01:32,030 INFO    MainThread:3631 [wandb_run.py:_console_start():1962] atexit reg
+2026-03-28 15:01:32,031 INFO    MainThread:3631 [wandb_run.py:_redirect():1820] redirect: SettingsConsole.WRAP_RAW
+2026-03-28 15:01:32,031 INFO    MainThread:3631 [wandb_run.py:_redirect():1885] Wrapping output streams.
+2026-03-28 15:01:32,031 INFO    MainThread:3631 [wandb_run.py:_redirect():1907] Redirects installed.
+2026-03-28 15:01:32,033 INFO    MainThread:3631 [wandb_init.py:init():732] run started, returning control to user process
+2026-03-28 18:13:12,976 INFO    MainThread:3631 [wandb_run.py:_finish():1728] finishing run samuelfournier06-universit-de-montr-al/mini-grp-hw3/ypsme0gv
+2026-03-28 18:13:12,979 INFO    MainThread:3631 [wandb_run.py:_atexit_cleanup():1931] got exitcode: 0
+2026-03-28 18:13:12,980 INFO    MainThread:3631 [wandb_run.py:_restore():1914] restore
+2026-03-28 18:13:12,980 INFO    MainThread:3631 [wandb_run.py:_restore():1920] restore done
+2026-03-28 18:13:13,023 INFO    MainThread:3631 [wandb_run.py:_on_finish():2221] got exit ret: file_counts {
+  wandb_count: 1
+}
+pusher_stats {
+  uploaded_bytes: 1084
+  total_bytes: 1084
+}
+
+2026-03-28 18:13:14,280 INFO    MainThread:3631 [wandb_run.py:_on_finish():2221] got exit ret: file_counts {
+  wandb_count: 1
+}
+pusher_stats {
+  uploaded_bytes: 1084
+  total_bytes: 1084
+}
+
+2026-03-28 18:13:15,769 INFO    MainThread:3631 [wandb_run.py:_on_finish():2221] got exit ret: file_counts {
+  wandb_count: 1
+}
+pusher_stats {
+  uploaded_bytes: 1084
+  total_bytes: 1084
+}
+
+2026-03-28 18:13:15,870 INFO    MainThread:3631 [wandb_run.py:_on_finish():2221] got exit ret: file_counts {
+  wandb_count: 6
+}
+pusher_stats {
+  uploaded_bytes: 1084
+  total_bytes: 11973
+}
+
+2026-03-28 18:13:15,972 INFO    MainThread:3631 [wandb_run.py:_on_finish():2221] got exit ret: file_counts {
+  wandb_count: 6
+}
+pusher_stats {
+  uploaded_bytes: 1084
+  total_bytes: 11973
+}
+
+2026-03-28 18:13:16,074 INFO    MainThread:3631 [wandb_run.py:_on_finish():2221] got exit ret: file_counts {
+  wandb_count: 6
+}
+pusher_stats {
+  uploaded_bytes: 1084
+  total_bytes: 11973
+}
+
+2026-03-28 18:13:16,175 INFO    MainThread:3631 [wandb_run.py:_on_finish():2221] got exit ret: file_counts {
+  wandb_count: 6
+}
+pusher_stats {
+  uploaded_bytes: 11973
+  total_bytes: 11973
+}
+
+2026-03-28 18:13:16,277 INFO    MainThread:3631 [wandb_run.py:_on_finish():2221] got exit ret: file_counts {
+  wandb_count: 6
+}
+pusher_stats {
+  uploaded_bytes: 11973
+  total_bytes: 11973
+}
+
+2026-03-28 18:13:16,379 INFO    MainThread:3631 [wandb_run.py:_on_finish():2221] got exit ret: file_counts {
+  wandb_count: 6
+}
+pusher_stats {
+  uploaded_bytes: 11973
+  total_bytes: 11973
+}
+
+2026-03-28 18:13:16,480 INFO    MainThread:3631 [wandb_run.py:_on_finish():2221] got exit ret: file_counts {
+  wandb_count: 6
+}
+pusher_stats {
+  uploaded_bytes: 11973
+  total_bytes: 11973
+}
+
+2026-03-28 18:13:21,581 INFO    MainThread:3631 [wandb_run.py:_on_finish():2221] got exit ret: None
+2026-03-28 18:13:26,682 INFO    MainThread:3631 [wandb_run.py:_on_finish():2221] got exit ret: None
+2026-03-28 18:13:31,784 INFO    MainThread:3631 [wandb_run.py:_on_finish():2221] got exit ret: None
+2026-03-28 18:13:36,885 INFO    MainThread:3631 [wandb_run.py:_on_finish():2221] got exit ret: None
+2026-03-28 18:13:41,986 INFO    MainThread:3631 [wandb_run.py:_on_finish():2221] got exit ret: None
+2026-03-28 18:13:42,811 INFO    MainThread:3631 [wandb_run.py:_on_finish():2221] got exit ret: file_counts {
+  wandb_count: 6
+}
+pusher_stats {
+  uploaded_bytes: 11973
+  total_bytes: 11973
+}
+
+2026-03-28 18:13:43,122 INFO    MainThread:3631 [wandb_run.py:_on_finish():2221] got exit ret: done: true
+exit_result {
+}
+file_counts {
+  wandb_count: 6
+}
+pusher_stats {
+  uploaded_bytes: 11973
+  total_bytes: 11973
+}
+local_info {
+}
+
+2026-03-28 18:13:44,228 INFO    MainThread:3631 [wandb_run.py:_footer_history_summary_info():3305] rendering history
+2026-03-28 18:13:44,228 INFO    MainThread:3631 [wandb_run.py:_footer_history_summary_info():3337] rendering summary
+2026-03-28 18:13:44,234 INFO    MainThread:3631 [wandb_run.py:_footer_sync_info():3261] logging synced files

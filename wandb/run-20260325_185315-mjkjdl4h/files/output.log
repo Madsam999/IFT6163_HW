@@ -1,0 +1,38 @@
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[Warning]: datasets path /opt/LIBERO/libero/libero/../datasets does not exist!
+Error executing job with overrides: ['experiment.name=hw3_dense_ppo_seed0_v5', 'r_seed=0', 'sim.task_set=libero_spatial', 'sim.eval_tasks=[9]', 'training.total_env_steps=200000', 'training.rollout_length=256', 'training.ppo_epochs=3', 'training.minibatch_size=64', 'training.learning_rate=0.00005']
+Traceback (most recent call last):
+  File "/project/60004/samuel/IFT6163_HW/hw3/train_dense_rl.py", line 256, in main
+    env = FastLIBEROEnv(
+  File "/project/60004/samuel/IFT6163_HW/hw3/../hw3/libero_env_fast.py", line 56, in __init__
+    self.env = DenseRewardEnv(
+  File "/opt/LIBERO/libero/libero/envs/env_wrapper.py", line 286, in __init__
+    super().__init__(**kwargs)
+  File "/opt/LIBERO/libero/libero/envs/env_wrapper.py", line 161, in __init__
+    super().__init__(**kwargs)
+  File "/opt/LIBERO/libero/libero/envs/env_wrapper.py", line 56, in __init__
+    self.env = TASK_MAPPING[self.problem_name](
+  File "/opt/LIBERO/libero/libero/envs/problems/libero_tabletop_manipulation.py", line 40, in __init__
+    super().__init__(bddl_file_name, *args, **kwargs)
+  File "/opt/LIBERO/libero/libero/envs/bddl_base_domain.py", line 135, in __init__
+    super().__init__(
+  File "/opt/conda/envs/roble/lib/python3.10/site-packages/robosuite/environments/manipulation/manipulation_env.py", line 162, in __init__
+    super().__init__(
+  File "/opt/conda/envs/roble/lib/python3.10/site-packages/robosuite/environments/robot_env.py", line 214, in __init__
+    super().__init__(
+  File "/opt/conda/envs/roble/lib/python3.10/site-packages/robosuite/environments/base.py", line 143, in __init__
+    self._reset_internal()
+  File "/opt/LIBERO/libero/libero/envs/bddl_base_domain.py", line 738, in _reset_internal
+    super()._reset_internal()
+  File "/opt/conda/envs/roble/lib/python3.10/site-packages/robosuite/environments/robot_env.py", line 510, in _reset_internal
+    super()._reset_internal()
+  File "/opt/conda/envs/roble/lib/python3.10/site-packages/robosuite/environments/base.py", line 296, in _reset_internal
+    render_context = MjRenderContextOffscreen(self.sim, device_id=self.render_gpu_device_id)
+  File "/opt/conda/envs/roble/lib/python3.10/site-packages/robosuite/utils/binding_utils.py", line 210, in __init__
+    super().__init__(sim, offscreen=True, device_id=device_id, max_width=max_width, max_height=max_height)
+  File "/opt/conda/envs/roble/lib/python3.10/site-packages/robosuite/utils/binding_utils.py", line 78, in __init__
+    self.gl_ctx = GLContext(max_width=max_width, max_height=max_height, device_id=self.device_id)
+  File "/opt/conda/envs/roble/lib/python3.10/site-packages/robosuite/renderers/context/egl_context.py", line 123, in __init__
+    raise ImportError(
+ImportError: Cannot initialize a EGL device display. This likely means that your EGL driver does not support the PLATFORM_DEVICE extension, which is required for creating a headless rendering context.
+Set the environment variable HYDRA_FULL_ERROR=1 for a complete stack trace.

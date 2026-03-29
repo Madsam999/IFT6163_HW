@@ -1,0 +1,72 @@
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[Warning]: datasets path /opt/LIBERO/libero/libero/../datasets does not exist!
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+/opt/conda/envs/roble/lib/python3.10/site-packages/wandb/sdk/lib/import_hooks.py:246: DeprecationWarning: Deprecated since Python 3.4 and slated for removal in Python 3.12; use importlib.util.find_spec() instead
+  loader = importlib.find_loader(fullname, path)
+[1024/200000] return=-317.990 policy_loss=-0.0346
+[2048/200000] return=-347.125 policy_loss=-0.0554
+[3072/200000] return=-347.681 policy_loss=-0.0929
+[4096/200000] return=-336.289 policy_loss=-0.0408
+[5120/200000] return=-331.531 policy_loss=-0.1021
+[6016/200000] return=-332.974 policy_loss=-0.0588
+[7040/200000] return=-394.074 policy_loss=-0.0725
+[8064/200000] return=-406.251 policy_loss=-0.0440
+[9088/200000] return=-414.028 policy_loss=-0.0612
+[10112/200000] return=-423.662 policy_loss=-0.0418
+[11008/200000] return=-451.347 policy_loss=-0.0666
+[12032/200000] return=-413.591 policy_loss=-0.0337
+[13056/200000] return=-354.970 policy_loss=-0.1188
+[14080/200000] return=-301.960 policy_loss=-0.0810
+[15104/200000] return=-306.720 policy_loss=-0.0775
+[16000/200000] return=-294.593 policy_loss=-0.0597
+[17024/200000] return=-305.411 policy_loss=-0.0878
+[18048/200000] return=-313.468 policy_loss=-0.0381
+[19072/200000] return=-311.957 policy_loss=-0.0334
+[20096/200000] return=-301.768 policy_loss=-0.0528
+[21120/200000] return=-267.070 policy_loss=-0.0861
+[22016/200000] return=-267.403 policy_loss=-0.1026
+[23040/200000] return=-264.150 policy_loss=-0.0158
+[24064/200000] return=-263.447 policy_loss=-0.0377
+[25088/200000] return=-276.756 policy_loss=-0.1216
+[26112/200000] return=-316.225 policy_loss=0.1234
+[27008/200000] return=-332.649 policy_loss=-0.0797
+[28032/200000] return=-328.283 policy_loss=-0.0577
+[29056/200000] return=-300.344 policy_loss=-0.0347
+Traceback (most recent call last):
+  File "/project/60004/samuel/IFT6163_HW/hw3/train_dense_rl.py", line 381, in <module>
+    main()
+  File "/opt/conda/envs/roble/lib/python3.10/site-packages/hydra/main.py", line 90, in decorated_main
+    _run_hydra(
+  File "/opt/conda/envs/roble/lib/python3.10/site-packages/hydra/_internal/utils.py", line 389, in _run_hydra
+    _run_app(
+  File "/opt/conda/envs/roble/lib/python3.10/site-packages/hydra/_internal/utils.py", line 452, in _run_app
+    run_and_report(
+  File "/opt/conda/envs/roble/lib/python3.10/site-packages/hydra/_internal/utils.py", line 213, in run_and_report
+    return func()
+  File "/opt/conda/envs/roble/lib/python3.10/site-packages/hydra/_internal/utils.py", line 453, in <lambda>
+    lambda: hydra.run(
+  File "/opt/conda/envs/roble/lib/python3.10/site-packages/hydra/_internal/hydra.py", line 119, in run
+    ret = run_job(
+  File "/opt/conda/envs/roble/lib/python3.10/site-packages/hydra/core/utils.py", line 186, in run_job
+    ret.return_value = task_function(task_cfg)
+  File "/project/60004/samuel/IFT6163_HW/hw3/train_dense_rl.py", line 296, in main
+    next_obs, reward, done, truncated, info = env.step(action_np)
+  File "/project/60004/samuel/IFT6163_HW/hw3/../hw3/libero_env_fast.py", line 241, in step
+    obs_dict, _, done, info_env = self.env.step(action.tolist())
+  File "/opt/LIBERO/libero/libero/envs/env_wrapper.py", line 88, in step
+    return self.env.step(action)
+  File "/opt/LIBERO/libero/libero/envs/bddl_base_domain.py", line 809, in step
+    obs, reward, done, info = super().step(action)
+  File "/opt/conda/envs/roble/lib/python3.10/site-packages/robosuite/environments/base.py", line 398, in step
+    reward, done, info = self._post_action(action)
+  File "/opt/LIBERO/libero/libero/envs/bddl_base_domain.py", line 818, in _post_action
+    reward, done, info = super()._post_action(action)
+  File "/opt/conda/envs/roble/lib/python3.10/site-packages/robosuite/environments/base.py", line 426, in _post_action
+    reward = self.reward(action)
+  File "/opt/LIBERO/libero/libero/envs/env_wrapper.py", line 329, in _dense_reward
+    is_grasping = self.env._check_grasp(gripper=gripper, object_geoms=self.env.get_object(obj1_name))
+  File "/opt/conda/envs/roble/lib/python3.10/site-packages/robosuite/environments/manipulation/manipulation_env.py", line 238, in _check_grasp
+    if not self.check_contact(g_group, o_geoms):
+  File "/opt/conda/envs/roble/lib/python3.10/site-packages/robosuite/environments/base.py", line 588, in check_contact
+    c2_in_g1 = self.sim.model.geom_id2name(contact.geom2) in geoms_1
+KeyboardInterrupt

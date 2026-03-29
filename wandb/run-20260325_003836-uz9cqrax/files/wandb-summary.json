@@ -1,0 +1,1 @@
+{"train/total_steps": 200192, "train/policy_loss": -0.046293686454494797, "train/value_loss": 1.2104519456624985, "train/entropy": 9.662137826283773, "train/episode_return": -279.78013712093235, "train/success_rate": 0.0, "_timestamp": 1774405053.6875691, "_runtime": 5936.80824303627, "_step": 200192, "_wandb": {"runtime": 5935}}

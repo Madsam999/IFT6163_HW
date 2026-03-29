@@ -58,7 +58,7 @@ class DensePolicy(nn.Module):
         """
         features = self.net(obs)
         mean = self.mean_head(features)
-        std = self.log_std.exp().expand_as(mean)
+        std = self.log_std.clamp(-4, 2).exp().expand_as(mean)
         return Normal(mean, std)
 
     def get_action(self, obs: torch.Tensor, deterministic: bool = False):
@@ -156,7 +156,8 @@ class RolloutBuffer:
 
 def ppo_update(policy: DensePolicy,
                value_fn: DenseValueFunction,
-               optimizer: torch.optim.Optimizer,
+               policy_optimizer: torch.optim.Optimizer,
+               value_optimizer: torch.optim.Optimizer,
                buffer: RolloutBuffer,
                returns: torch.Tensor,
                advantages: torch.Tensor,
@@ -171,6 +172,8 @@ def ppo_update(policy: DensePolicy,
     old_log_probs = buffer.log_probs.detach()
 
     advantages = (advantages - advantages.mean()) / (advantages.std() + 1e-8)
+    # Do NOT normalize returns — the value function must learn raw return scale.
+    # Normalizing per-rollout changes the target scale each update, preventing convergence.
 
     n = buffer.rollout_length
     total_policy_loss = 0.0
@@ -187,7 +190,7 @@ def ppo_update(policy: DensePolicy,
             new_log_probs = dist.log_prob(actions[mb_idx]).sum(-1)
             entropy = dist.entropy().sum(-1).mean()
 
-            ratio = (new_log_probs - old_log_probs[mb_idx]).exp()
+            ratio = (new_log_probs - old_log_probs[mb_idx]).exp().clamp(max=10.0)
             mb_adv = advantages[mb_idx]
             surr1 = ratio * mb_adv
             surr2 = ratio.clamp(1 - cfg.training.clip_eps, 1 + cfg.training.clip_eps) * mb_adv
@@ -195,14 +198,25 @@ def ppo_update(policy: DensePolicy,
 
             value_loss = F.mse_loss(value_fn(obs[mb_idx]), returns[mb_idx])
 
-            loss = policy_loss + cfg.training.vf_coef * value_loss - cfg.training.ent_coef * entropy
-            optimizer.zero_grad()
-            loss.backward()
-            nn.utils.clip_grad_norm_(
-                list(policy.parameters()) + list(value_fn.parameters()),
-                cfg.training.max_grad_norm,
-            )
-            optimizer.step()
+            # Policy update
+            p_loss = policy_loss - cfg.training.entropy_coeff * entropy
+            policy_optimizer.zero_grad()
+            p_loss.backward(retain_graph=True)
+            for p in policy.parameters():
+                if p.grad is not None:
+                    p.grad.nan_to_num_(nan=0.0, posinf=0.0, neginf=0.0)
+            nn.utils.clip_grad_norm_(policy.parameters(), cfg.training.max_grad_norm)
+            policy_optimizer.step()
+
+            # Value function update (no grad clipping — let it converge to raw returns fast)
+            v_loss = cfg.training.value_coeff * value_loss
+            value_optimizer.zero_grad()
+            v_loss.backward()
+            for p in value_fn.parameters():
+                if p.grad is not None:
+                    p.grad.nan_to_num_(nan=0.0, posinf=0.0, neginf=0.0)
+            nn.utils.clip_grad_norm_(value_fn.parameters(), cfg.training.max_grad_norm)
+            value_optimizer.step()
 
             total_policy_loss += policy_loss.item()
             total_value_loss += value_loss.item()
@@ -250,16 +264,18 @@ def main(cfg: DictConfig):
     policy = DensePolicy(obs_dim, action_dim, cfg.policy.hidden_dim, cfg.policy.n_layers).to(device)
     value_fn = DenseValueFunction(obs_dim, cfg.policy.hidden_dim, cfg.policy.n_layers).to(device)
 
-    optimizer = torch.optim.Adam(
-        list(policy.parameters()) + list(value_fn.parameters()),
-        lr=cfg.training.learning_rate,
+    policy_optimizer = torch.optim.Adam(
+        policy.parameters(), lr=cfg.training.learning_rate,
+    )
+    value_optimizer = torch.optim.Adam(
+        value_fn.parameters(), lr=cfg.training.learning_rate,
     )
 
     buffer = RolloutBuffer(cfg.training.rollout_length, obs_dim, action_dim, device)
 
     # --- Rollout state ---
     obs, _ = env.reset()
-    obs_tensor = torch.tensor(obs, dtype=torch.float32, device=device)
+    obs_tensor = torch.tensor(np.nan_to_num(obs, nan=0.0), dtype=torch.float32, device=device)
     episode_return = 0.0
     episode_steps = 0
     total_steps = 0
@@ -282,11 +298,25 @@ def main(cfg: DictConfig):
                 episode_steps += 1
                 total_steps += 1
 
+                # Handle truncation: bootstrap value for correct GAE returns.
+                # In this env, ALL episode endings are truncations (time limit),
+                # never true terminals. Without this, GAE sees return=reward at
+                # the last step instead of return=reward + γ·V(s_next), an error
+                # of ~47 that corrupts advantages and causes policy degradation.
+                store_reward = reward
+                if truncated:
+                    next_obs_tensor = torch.tensor(
+                        np.nan_to_num(next_obs, nan=0.0),
+                        dtype=torch.float32, device=device,
+                    )
+                    bootstrap_val = value_fn(next_obs_tensor.unsqueeze(0)).squeeze(0)
+                    store_reward += cfg.training.gamma * bootstrap_val.item()
+
                 buffer.add(
                     obs_tensor,
                     action.squeeze(0),
                     log_prob.squeeze(0),
-                    torch.tensor(reward, device=device),
+                    torch.tensor(store_reward, device=device),
                     value.squeeze(0),
                     torch.tensor(float(done or truncated), device=device),
                 )
@@ -299,7 +329,7 @@ def main(cfg: DictConfig):
                     obs, _ = env.reset()
                 else:
                     obs = next_obs
-                obs_tensor = torch.tensor(obs, dtype=torch.float32, device=device)
+                obs_tensor = torch.tensor(np.nan_to_num(obs, nan=0.0), dtype=torch.float32, device=device)
 
                 if buffer.full():
                     break
@@ -312,7 +342,7 @@ def main(cfg: DictConfig):
         )
 
         # PPO update
-        update_info = ppo_update(policy, value_fn, optimizer, buffer, returns, advantages, cfg)
+        update_info = ppo_update(policy, value_fn, policy_optimizer, value_optimizer, buffer, returns, advantages, cfg)
 
         # Logging
         if total_steps % cfg.log_interval < cfg.training.rollout_length:
@@ -333,7 +363,8 @@ def main(cfg: DictConfig):
             ckpt = {
                 "policy": policy.state_dict(),
                 "value_fn": value_fn.state_dict(),
-                "optimizer": optimizer.state_dict(),
+                "policy_optimizer": policy_optimizer.state_dict(),
+                "value_optimizer": value_optimizer.state_dict(),
                 "total_steps": total_steps,
                 "cfg": OmegaConf.to_container(cfg),
             }

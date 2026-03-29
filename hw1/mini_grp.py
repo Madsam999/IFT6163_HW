@@ -1,184 +1,583 @@
+## Code to fetch data and create an easy dataset.
 
-  
-import dill
-import hydra
+import hydra, json
 from omegaconf import DictConfig, OmegaConf
-import threading
-from queue import Queue
+from transformers import T5Tokenizer, T5ForConditionalGeneration
+## import python garbage collector
+import gc
+gc.enable()
+import numpy as np
 import torch
+import cv2
+import time
+import torch.profiler
+import os
+from typing import Any, Callable, Dict, List, Optional, Tuple
 
-def get_inverse_sqrt_lambda(optimizer, warmup_steps):
+# Set the max size to 10GB (10 * 1024 * 1024 * 1024 bytes)
+size = 20 * 1024 * 1024 * 1024
+os.environ["HF_DATASETS_IN_MEMORY_MAX_SIZE"] = str(size)
+
+# def apply_transforms(episode, cfg, dataset_name):
+#     """
+#     Apply the necessary transforms to the episode data.
+#     This function is a placeholder for any transformations that need to be applied.
+#     """
+# import prismatic.vla.datasets.rlds.oxe.transforms as rlds_transforms
+
+#     # Example transformation: resize images, normalize actions, etc.
+#     # episode = [rlds_transforms.OXE_STANDARDIZATION_TRANSFORMS[cfg.dataset.dataset_indicies[dataset_name]["dataset_key"]](x) for x in episode]
+#     return episode
+
+# === Bridge-V2 =>> Dataset-Specific Transform ===
+def relabel_bridge_actions(traj: Dict[str, Any]) -> Dict[str, Any]:
+    """Relabels actions to use reached proprioceptive state; discards last timestep (no-action)."""
+    movement_actions = traj["observation"]["state"][:6] - traj["observation"]["state"][:6]
+    traj_truncated = tf.nest.map_structure(lambda x: x[:-1], traj)
+    traj_truncated["action"] = tf.concat([movement_actions, traj["action"][:-1, -1:]], axis=1)
+
+    return traj_truncated
+
+def bridge_oxe_dataset_transform(trajectory):
     """
-    Creates a lambda function for an inverse square root learning rate schedule 
-    with a linear warmup phase.
+    Applies to version of Bridge V2 in Open X-Embodiment mixture.
+
+    Note =>> In original Bridge V2 dataset, the first timestep has an all-zero action, so we remove it!
     """
-    def lr_lambda(current_step):
-        # Ensure the step is at least 1 to avoid division by zero or log issues
-        current_step += 1 
-        # Linear warmup phase
-        if current_step < warmup_steps:
-            return float(current_step) / float(warmup_steps)
-        # Inverse square root decay phase
+    # trajectory = trajectory[1:]  # Remove the first timestep with all-zero action
+
+    for i in range(0, len(trajectory)-1):
+        trajectory[i]["action"] = np.concatenate((trajectory[i]['action']['world_vector'], 
+                                                    trajectory[i]['action']['rotation_delta'], 
+                                                        [trajectory[i]['action']['open_gripper']], 
+                                                        ), axis=-1
+                                                    ).astype(np.float32)
+        trajectory[i]["language_instruction"] = trajectory[i]["observation"]["natural_language_instruction"]
+        # trajectory[i] = relabel_bridge_actions(trajectory[i])
+        trajectory[i]["action"][:6] = trajectory[i+1]["observation"]["state"][:6] - trajectory[i]["observation"]["state"][:6] ## Get realtive change action
+        ## Clip action to be between -1 and 1
+        trajectory[i]["action"] = np.clip(trajectory[i]["action"], -1.0, 1.0)
+        trajectory[i]["observation"]["eef_state"] = trajectory[i]["observation"]["state"][:6]
+        trajectory[i]["observation"]["gripper_state"] = trajectory[i]["observation"]["state"][-1:]
+    return trajectory[:-1] ## Remove last timestep with no action
+
+def maniskill_dataset_transform(trajectory):
+    for i in range(0, len(trajectory)):
+        trajectory[i]["observation"]["gripper_state"] = trajectory[i]["observation"]["state"][7:8]
+        trajectory[i]["observation"]["eef_state"] = trajectory[i]["observation"]["state"][1:7] ## TODO: Not sure if this is the information for wrist pos and rotation
+        trajectory[i]["action"] = trajectory[i]["action"].numpy()
+        trajectory[i]['observation']["natural_language_instruction"] = trajectory[i]["language_instruction"]
+    return trajectory
+
+def libero_dataset_transform(trajectory):
+    for i in range(0, len(trajectory)):
+        trajectory[i]["observation"]["gripper_state"] = trajectory[i]["observation"]["state"][6:7]
+        # trajectory[i]["observation"]["gripper_state"] = trajectory[i]["observation"]["state"][-2:]  # 2D gripper state
+        trajectory[i]["observation"]["eef_state"] = trajectory[i]["observation"]["state"][:6] ## TODO: Not sure if this is the information for wrist pos and rotation
+        trajectory[i]["action"] = trajectory[i]["action"].numpy()
+        trajectory[i]["action"][-1:] = 1 - np.clip(trajectory[i]["action"][-1:], 0, 1)
+        trajectory[i]['observation']["natural_language_instruction"] = trajectory[i]["language_instruction"]
+    return trajectory
+
+def robocook_dataset_transform(trajectory):
+    for i in range(0, len(trajectory)):
+        trajectory[i]["observation"]["eef_state"] = trajectory[i]["observation"]["state"][:6]
+        trajectory[i]["action"] = trajectory[i]["action"].numpy()
+        trajectory[i]['observation']["natural_language_instruction"] = trajectory[i]["language_instruction"]
+        trajectory[i]["observation"]["gripper_state"] = trajectory[i]["observation"]["state"][-1:]
+        trajectory[i]["observation"]["image"] = trajectory[i]["observation"]["image_1"]
+    return trajectory
+
+def saytap_transform(trajectory):
+    for i in range(0, len(trajectory)):
+        trajectory[i]["observation"]["eef_state"] = np.concatenate((trajectory[i]["observation"]["desired_vel"].numpy(),
+                                                                trajectory[i]["observation"]["proj_grav_vec"].numpy() ),
+                                                                  axis=-1).astype(np.float32)
+        trajectory[i]["observation"]["gripper_state"] = 0 ## No gripper state in SayTap
+        trajectory[i]["action"] = trajectory[i]["action"].numpy()
+        trajectory[i]["state"] = trajectory[i]["observation"]["state"].numpy()
+        trajectory[i]['observation']["natural_language_instruction"] = trajectory[i]["language_instruction"]
+        # trajectory[i]["observation"]["gripper_state"] = trajectory[i]["observation"]["state"][-1:]
+        # trajectory[i]["observation"]["image"] = trajectory[i]["observation"]["image_1"]
+    return trajectory
+
+
+def apply_transforms(episode, cfg, dataset_name):
+    """
+    Apply the necessary transforms to the episode data.
+    This function is a placeholder for any transformations that need to be applied.
+    """
+    TRANSFORMS = {
+        "bridge_oxe": bridge_oxe_dataset_transform,
+        "stanford_robocook_converted_externally_to_rlds": robocook_dataset_transform,
+        "maniskill_dataset_converted_externally_to_rlds": maniskill_dataset_transform,
+        "saytap": saytap_transform,
+        "libero_dataset_transform": libero_dataset_transform,
+        # Add other dataset specific transforms here if needed
+    }
+    # Example transformation: resize images, normalize actions, etc.
+    episode = TRANSFORMS[cfg.dataset.dataset_indicies[dataset_name]["dataset_key"]](episode)
+    return episode
+
+def get_total_dict_size(d):
+    import sys
+    import numpy as np
+    # Start with the size of the dictionary object itself
+    total_size = sys.getsizeof(d)
+    
+    for key, value in d.items():
+        # Add the size of the key (usually a string)
+        total_size += sys.getsizeof(key)
+        
+        # Add the size of the NumPy object + its internal data buffer
+        if isinstance(value, np.ndarray):
+            total_size += sys.getsizeof(value) + value.nbytes
         else:
-            return float(warmup_steps) / float(current_step)**0.5
-    return lr_lambda
+            total_size += sys.getsizeof(value)
+            
+    return total_size
+
+def convert_numpy_arrays_to_pil(dataset_dict):
+    """
+    Convert numpy arrays in dataset to PIL images for Hugging Face Hub visualization.
+    Supports both torch tensors and numpy arrays.
+    """
+    from PIL import Image
+    import numpy as np
+    import torch
+    
+    converted_dict = {}
+    for key, value in dataset_dict.items():
+        if key in ["img", "goal_img"]:
+            # Convert image arrays to PIL images for visualization on HF Hub
+            pil_images = []
+            if isinstance(value, torch.Tensor):
+                value = value.cpu().numpy()
+            
+            # Handle batch of images
+            if len(value.shape) == 4:  # [B, H, W, C]
+                for img_array in value:
+                    # Ensure values are in 0-255 range
+                    if img_array.dtype == np.float32 or img_array.dtype == np.float64:
+                        img_array = (img_array * 255).astype(np.uint8)
+                    else:
+                        img_array = img_array.astype(np.uint8)
+                    # Convert BGR to RGB if needed (common with OpenCV)
+                    if img_array.shape[2] == 3:
+                        img_pil = Image.fromarray(img_array[:, :, ::-1], mode='RGB')
+                    else:
+                        img_pil = Image.fromarray(img_array, mode='RGB')
+                    pil_images.append(img_pil)
+                converted_dict[key] = pil_images
+            else:
+                converted_dict[key] = value
+        else:
+            converted_dict[key] = value
+    
+    return converted_dict
+
+class CircularBuffer:
+    """ A circular buffer implemented using a collection of numpy arrays.
+    The buffer stores images, actions, goals, goal images, rotation deltas, and open gripper states.
+    The buffer has a fixed size and overwrites old data when full.
+    The buffer is initialized with a size and a configuration object.
+    """
+    def __init__(self, size, cfg, model):
+        from cProfile import Profile
+        from pstats import SortKey, Stats
+        import tensorflow_datasets as tfds
+
+        # with Profile() as profile:
+        self._cfg = cfg
+        self._model = model
+        self._index = 0
+        self._count = 0
+        
+        self._dataset_tmp = self.update_internal_dataset(size, old_data=None) 
+                    
+        if self._cfg.dataset.encode_with_t5:
+            self._tokenizer = T5Tokenizer.from_pretrained(self._cfg.dataset.t5_version)
+            self._text_model = T5ForConditionalGeneration.from_pretrained(self._cfg.dataset.t5_version)
+            # self._dataset_tmp["t5_language_embedding"] = torch.tensor(np.zeros(shape=(self._size, self._cfg.max_block_size, self._cfg.n_embd)), dtype=torch.float, device=self._cfg.device)[0],  
+
+        self._builders = {}
+        if self._cfg.dataset.num_episodes > 0:
+            for dataset_name in self._cfg.dataset.dataset_indicies:
+                self._builders[dataset_name] = tfds.builder_from_directory(builder_dir=dataset_name)
+                print("dataset size:", self._builders[dataset_name].info.splits["train"].num_examples)
+
+        chars = cfg.dataset.chars_list
+        cfg.vocab_size = len(chars)
+        # create a mapping from characters to integers
+        stoi = { ch:i for i,ch in enumerate(chars) }
+        itos = { i:ch for i,ch in enumerate(chars) }
+        self._encode_txt = lambda s: [stoi[c] for c in s] # text encoder to tokens: 
+        self._decode_txy = lambda l: ''.join([itos[i] for i in l]) # token decoder to text: 
+        print("vocab_size:", cfg.vocab_size)
+
+        cfg.action_dim = len(cfg.dataset.action_mean)
+
+        self._dataset_indecies = self._cfg.dataset.dataset_indicies
+        start_ = time.time()
+        if self._cfg.dataset.load_dataset is True:
+            # Load the dataset from a file
+            import datasets
+            # with torch.profiler.record_function("Load huggingface dataset"):
+            start__ = time.time()
+            ## Load huggingface dataset into memory
+            ## Only load first 200 samples for debugging
+            dataset = datasets.load_dataset(self._cfg.dataset.to_name, split='train[:{}]'.format(self._cfg.dataset.buffer_size), keep_in_memory=True)
+            print("Time to load huggingface dataset:", time.time() - start_)
+            dataset_tmp = {
+                "img": dataset["img"][:self._cfg.dataset.buffer_size], ## Some loading optimizations to improve debugging
+                "action": dataset["action"][:self._cfg.dataset.buffer_size],
+                "goal_img": dataset["goal_img"][:self._cfg.dataset.buffer_size],
+                "goal_text_full": dataset["goal_text_full"][:self._cfg.dataset.buffer_size],
+                "t5_language_embedding": dataset["t5_language_embedding"][:self._cfg.dataset.buffer_size] if self._cfg.dataset.encode_with_t5 else None,
+                "pose": dataset["pose"][:self._cfg.dataset.buffer_size],
+            }
+            print("Time to load huggingface data and copy: ", time.time() - start__)
+            for i in range(len(dataset_tmp["img"])):
+                if len(dataset_tmp["action"][i:i+self._cfg.policy.action_stacking]) < self._cfg.policy.action_stacking:
+                    print("Skipping index", i, "because action length is less than", self._cfg.policy.action_stacking)
+                    continue
+                pose = dataset_tmp["pose"][i]
+                action = dataset_tmp["action"][i]
+                self.add(
+                        dataset_tmp["img"][i], 
+                        action,
+                        dataset_tmp["goal_text_full"][i], 
+                        dataset_tmp["goal_img"][i],
+                        language_instruction=dataset_tmp["t5_language_embedding"][i] if cfg.dataset.encode_with_t5 else None,
+                        terminal=0,
+                        pose=pose,
+                        )
+            print("Loaded dataset with size:", self._count)
+        elif self._cfg.dataset.load_dataset == "skip":
+            pass
+        else:
+            
+            get_multi_dataset_portion(self._builders, self, self._cfg)
+            print("Time to load full dataset:", time.time() - start_)
+
+    def update_internal_dataset(self, size, old_data=None):
+        self._size = size
+        _dataset_tmp = {
+                    "img": torch.tensor(np.zeros(shape=(size, self._cfg.image_shape[0], self._cfg.image_shape[0], 3)), dtype=torch.uint8, device=self._cfg.device), 
+                    "pose": torch.tensor(np.zeros(shape=(size, len(self._cfg.dataset.action_std)),), dtype=torch.float, device=self._cfg.device),
+                    "action": torch.tensor(np.zeros(shape=(size, len(self._cfg.dataset.action_std)),), dtype=torch.float, device=self._cfg.device),
+                    "goal": torch.tensor(np.zeros(shape=(size, self._cfg.max_block_size)), dtype=torch.long, device=self._cfg.device), 
+                    "goal_text_full": ["" for _ in range(size)], # This is a list of strings, not a tensor
+                    "goal_img": torch.tensor(np.zeros(shape=(size, self._cfg.image_shape[0], self._cfg.image_shape[0], 3)), dtype=torch.uint8, device=self._cfg.device),
+                    # "rotation_delta": [], "open_gripper": [] 
+                    "t5_language_embedding": torch.tensor(np.zeros(shape=(size, self._cfg.max_block_size, self._cfg.n_embd)), dtype=torch.float, device=self._cfg.device) if self._cfg.dataset.encode_with_t5 else None,
+                    "terminal": torch.tensor(np.zeros(shape=(size, 1)), dtype=torch.uint8, device=self._cfg.device),
+                    } 
+        if old_data is not None:
+            for key in _dataset_tmp:
+                if key == "t5_language_embedding" and self._cfg.dataset.encode_with_t5 is False:
+                    continue
+                _dataset_tmp[key][:len(old_data[key])] = old_data[key]
+
+        return _dataset_tmp
+
+
+
+    def print_mem_footprint(self):
+        from pympler import asizeof
+        print("Memory used by the dataset cBuffer:", get_total_dict_size(self._dataset_tmp) / 1e6, "MB")
+        ## Compute the memory use of the datset part self._dataset_tmp["img"]
+        print("Memory used by the dataset cBuffer image:", asizeof.asizeof(self._dataset_tmp["img"]) / 1e6, "MB")
+        print("Memory used by the dataset cBuffer goal image:", asizeof.asizeof(self._dataset_tmp["goal_img"]) / 1e6, "MB")
+        print("Memory used by the dataset cBuffer: t5_language_embedding", asizeof.asizeof(self._dataset_tmp["t5_language_embedding"]) / 1e6, "MB")
+
+    def add(self, obs, action, goal, goal_img, language_instruction=None, pose=None, terminal=0, 
+            morphology=0):
+        """ Add an observation, action, goal, goal image, rotation delta, and open gripper state to the buffer."""
+    
+        self._dataset_tmp["img"][self._index] = torch.tensor(np.array(obs), dtype=torch.uint8, device=self._cfg.device)
+        self._dataset_tmp["goal_img"][self._index] = torch.tensor(np.array(goal_img), dtype=torch.uint8, device=self._cfg.device)
+        self._dataset_tmp["action"][self._index] = torch.tensor(action, dtype=torch.float, device=self._cfg.device)
+        if pose is not None:
+            self._dataset_tmp["pose"][self._index] = torch.tensor(pose, dtype=torch.float32, device=self._cfg.device)  # Store robot pose
+            
+        self._dataset_tmp["goal_text_full"][self._index] = goal  # Store the full goal text
+        self._dataset_tmp["terminal"][self._index] = torch.tensor(terminal, dtype=torch.uint8, device=self._cfg.device)
+        
+        ## Make goal embeddings of a fixed length and fill in the earlier chunks with the true goal data
+        if self._cfg.dataset.encode_with_t5:
+            if language_instruction is not None:
+                ##TODO: This does not work if the original language instrictuion size is less than the new max_block_size
+                self._dataset_tmp["t5_language_embedding"][self._index] = torch.tensor(language_instruction[:self._cfg.max_block_size], dtype=torch.float, device=self._cfg.device)
+            else:
+                with torch.profiler.record_function("Process goal text with T5"):
+                    goal_ = self._model.process_text_embedding_for_buffer(goal, tokenizer=self._tokenizer, text_model=self._text_model)
+                    self._dataset_tmp["t5_language_embedding"][self._index] = torch.tensor(goal_, dtype=torch.float, device=self._cfg.device)
+        
+        goal_ = " " * self._cfg.max_block_size
+        goal_ = goal[:self._cfg.max_block_size] + goal_[len(goal):self._cfg.max_block_size] 
+        # assert len(goal_) == self._cfg.max_block_size
+        self._dataset_tmp["goal"][self._index] = torch.tensor(self._encode_txt(goal_), dtype=torch.float, device=self._cfg.device)
+        self._count += 1
+        if self._cfg.dataset.download_all is True and (self._count >= self._size):
+            ## Double the buffer sizes to fit all the data.
+            print("Doubling buffer size from", self._size, "to", self._size * 2, " to fit incomming data.")
+            self.print_mem_footprint()
+            old_data = self._dataset_tmp
+            self._dataset_tmp = self.update_internal_dataset(self._size * 2, old_data=old_data)
+        else:
+            self._index = (self._index + 1) % self._size
+
+    def get_batch_grp(self, split, cfg, batch_size, morphology=0):
+        # from torchvision import transforms
+        from torchvision.transforms import v2 # Recommend v2 for new code
+        from einops import rearrange
+        if self._cfg.policy.use_image_augmentations:
+            # TODONE:
+            ## Add image Augmentations to improve performance
+            transform_crop_scale = v2.Compose([
+                v2.ColorJitter(brightness=0.2, contrast=0.2, saturation=0.2, hue=0.1),
+                v2.ToDtype(torch.float32)
+            ])
+            pass
+        else:
+            transform_crop_scale = v2.Compose([
+                v2.ToDtype(torch.float32) # Convert to float [0,1] after crop/resize
+            ])
+        # generate a small batch of inputs x and targets y
+        # data = dataset['train'] if split == 'train' else dataset['test']
+        data = self._dataset_tmp
+        
+        ## Randomly sample indices for the batch but account for action stacking past the index and obs_stacking before the index.
+        ix = np.random.randint(min(self._count, self._size)-((cfg.policy.action_stacking + cfg.policy.obs_stacking)-1), size=(batch_size,))
+        
+        obs_ = data["img"][ix-cfg.policy.obs_stacking+1].to(torch.float).unsqueeze(1) # Convert to [B, T, C, H, W] format for torchvision transforms, and back.
+        for i in range(1, cfg.policy.obs_stacking): ## This is slow but works.
+            obs_ = torch.cat((obs_, data["img"][ix-cfg.policy.obs_stacking+1+i].unsqueeze(1)), axis=1) ## concatenate along the time dimension 
+        obs_ = obs_.permute(0, 1, 4, 2, 3)
+        obs_ = transform_crop_scale(obs_) # Convert to [B, T, C, H, W] format for torchvision transforms, and back.
+        obs_ = obs_.permute(0, 1, 3, 4, 2)
+        x = self._model.normalize_state(rearrange(obs_, 'b t h w c -> b h w (c t)', c=3, t=cfg.policy.obs_stacking)) ## Rearranging the image to have the stacked history in the last channel dimension)  # Flatten the time dimension for batching
+    
+        pose = data["pose"][ix].to(torch.float32).unsqueeze(1) # Convert to [B, T, C]
+
+        if cfg.dataset.encode_with_t5:
+            x_goal = torch.tensor(data["t5_language_embedding"][ix], dtype=torch.float, device=cfg.device)
+        else:
+            x_goal = data["goal"][ix]
+    
+        x_goal_raw = data["goal_img"][ix].to(torch.float)
+        x_goal_raw = x_goal_raw.permute(0, 3, 1, 2)
+        x_goal_aug = transform_crop_scale(x_goal_raw)
+        x_goal_aug = x_goal_aug.permute(0, 2, 3, 1)
+        x_goal_img = self._model.normalize_state(x_goal_aug)
+        x_goal_img = x_goal_img # Convert to [B, H, W, C] format from torchvision.
+    
+        # TODO: 
+        ## Provide the block masking logic for the attention head
+        y = self._model.encode_action(data["action"][ix])
+        if cfg.policy.action_stacking > 1:
+            ## Stack the next cfg.policy.action_stacking actions together
+            for i in range(1, cfg.policy.action_stacking): ## This is slow but works.
+                y = torch.cat((y, self._model.encode_action(data["action"][ix + i])), axis=1) ## stack on time timension.
+        
+        return x, pose, x_goal, x_goal_img, y
+    
+    def shuffle(self, shared_queue):
+        print("num", shared_queue)
+        while True:
+            data = shared_queue.get() ## Update the data when messaged from the Queue
+            if data is None:
+                break
+            ## Call function to swap out a portion of data.
+            get_multi_dataset_portion(self._builders, self, self._cfg)
+
+    def save(self, path):
+        """
+        Save the dataset to a file.
+        """
+        ## Prepare dataset for push to huggingface
+        from datasets import Dataset
+        import datasets
+        from PIL import Image
+
+        ##TODO: fix bug where the saved data can be full of empty arrays after self._count
+
+        ## Trim the dataset to the actual count
+        self._dataset_tmp = {k: v for k, v in self._dataset_tmp.items() if not (k == "t5_language_embedding" and self._cfg.dataset.encode_with_t5 is False)}
+        for key in self._dataset_tmp:
+            ## check if the key is a list of strings
+            if isinstance(self._dataset_tmp[key], list): ## Text data
+                self._dataset_tmp[key] = self._dataset_tmp[key][:self._count]
+            else:
+                self._dataset_tmp[key] = self._dataset_tmp[key][:self._count].detach().cpu().numpy()
+        print("Trimmed data size to remove zeros")
+
+        ## Convert numpy arrays to PIL images for HF Hub visualization
+        print("Converting images to PIL format for Hugging Face Hub...")
+        self._dataset_tmp = convert_numpy_arrays_to_pil(self._dataset_tmp)
+
+        ds = Dataset.from_dict(self._dataset_tmp)
+        print("Converted data to huggingface dataset.")
+        ## create a normal distribution in torch
+        a_std, a_mean = (self._dataset_tmp["action"]).std(axis=0) + 1e-8, self._dataset_tmp["action"].mean(axis=0)
+        self._cfg.dataset.action_std = [float(x) for x in a_std]
+        self._cfg.dataset.action_mean = [float(x) for x in a_mean   ]
+
+        with open('./config.json', 'w') as f:
+            json.dump(OmegaConf.to_container(self._cfg, resolve=True), f, indent=2)
+        print("Saved config file.")
+        new_features = ds.features.copy()
+        # new_features["img"] = Image()
+        ds.cast(new_features)
+        print('Features:', ds.features)
+        ds.push_to_hub(self._cfg.dataset.to_name)
+    
+def get_dataset_portion(builder, cbuffer, cfg, list_, dataset_name=None):
+    """
+    Helper function to get a portion of the dataset.
+    """
+    import cv2
+    import numpy as np
+    from datasets import load_dataset
+    # ------------
+    # Train and test splits
+    # Loading data
+    # create RLDS dataset builder
+    for c in list(list_):
+        datasetRemote = builder.as_dataset(split='train[' + str(c) + ':' + str(c+cfg.dataset.chunk_size) + ']') ## Most likely a very slow way to get data from the dataset, but it is a better mix
+        gc.collect()
+        for episode in datasetRemote:
+            episode = list(episode['steps'])
+            ## https://github.com/openvla/openvla/blob/main/prismatic/vla/datasets/rlds/oxe/transforms.py
+            episode = apply_transforms(episode, cfg, dataset_name)
+            goal_img = cv2.resize(np.array(episode[-1]['observation']["image"], dtype=np.float32), (cfg.image_shape[0], cfg.image_shape[1]))  
+            for i in range(len(episode)): ## Resize images to reduce computation
+                obs = cv2.resize(np.array(episode[i]['observation']["image"], dtype=np.float32), (cfg.image_shape[0], cfg.image_shape[1]))
+                pose = np.concatenate([episode[i]["observation"]["eef_state"].numpy(), episode[i]["observation"]["gripper_state"].numpy()])
+                ## Apply any additional transformations like https://github.com/openvla/openvla/blob/main/prismatic/vla/datasets/rlds/dataset.py#L39
+                cbuffer.add(obs = obs, 
+                            action = episode[i]['action'],
+                            goal= episode[i]['observation']["natural_language_instruction"].numpy().decode(),
+                            goal_img=goal_img,
+                            terminal = 1 if (i == (len(episode) - 1)) or episode[i]['is_terminal'] else 0,
+                            pose = pose,
+                            # morphology = cfg.dataset.dataset_indicies[dataset_name]["morphology"],
+                            )
+    print("A terminé le mélange.")
+    return cbuffer
+
+def _create_dataset_generator(builder, cfg, dataset_name, ix):
+    """
+    Generator function for creating datasets using from_generator.
+    Yields individual samples from the dataset.
+    """
+    import cv2
+    import numpy as np
+    import gc
+    from PIL import Image
+    
+    for c in ix:
+        datasetRemote = builder.as_dataset(split='train[' + str(c) + ':' + str(c+cfg.dataset.chunk_size) + ']')
+        gc.collect()
+        for episode in datasetRemote:
+            episode = list(episode['steps'])
+            episode = apply_transforms(episode, cfg, dataset_name)
+            goal_img = cv2.resize(np.array(episode[-1]['observation']["image"], dtype=np.float32), 
+                                  (cfg.image_shape[0], cfg.image_shape[1]))
+            
+            for i in range(len(episode)):
+                obs = cv2.resize(np.array(episode[i]['observation']["image"], dtype=np.float32), 
+                                (cfg.image_shape[0], cfg.image_shape[1]))
+                pose = np.concatenate([episode[i]["observation"]["eef_state"].numpy(), 
+                                      episode[i]["observation"]["gripper_state"].numpy()])
+                
+                yield {
+                    "img": Image.fromarray(obs.astype(np.uint8), mode='RGB'),
+                    "action": episode[i]['action'],
+                    "goal_text_full": episode[i]['observation']["natural_language_instruction"].numpy().decode(),
+                    "goal_img": Image.fromarray(goal_img.astype(np.uint8), mode='RGB'),
+                    "terminal": 1 if (i == (len(episode) - 1)) or episode[i]['is_terminal'] else 0,
+                    "pose": pose,
+                }
+
+def get_multi_dataset_portion(builders, cbuffer, cfg):
+    """
+    Helper function to get a portion of the dataset.
+    Supports both direct loading and huggingface from_generator option.
+    """
+    import tensorflow_datasets as tfds
+    import numpy as np
+    from tqdm import tqdm, trange
+    import cv2
+    from datasets import load_dataset, Dataset
+    
+    # Check if we should use from_generator approach
+    use_generator = getattr(cfg.dataset, 'use_generator', False)
+    
+    for dataset_name, builder in builders.items():
+        print("Loading dataset:", dataset_name)
+        ## Get the number of items in the dataset
+        samples_ = (int(cfg.dataset.num_episodes * 
+                        cfg.dataset.dataset_indicies[dataset_name]["weight"]))/cfg.dataset.chunk_size
+        print(" size_ ", builder.info.splits["train"].num_examples
+                , " total samples to fetch", int(samples_),
+                 " chunk_size ", cfg.dataset.chunk_size)
+        if cfg.dataset.download_all is True:
+            ## Most likely grabbing the entire dataset
+            ## create a list that contains the indicies to grab data, where each index is the start of a chunk
+            ix = list(range(0, cfg.dataset.num_episodes, cfg.dataset.chunk_size))
+        else:
+            ix = np.random.randint(builder.info.splits["train"].num_examples-cfg.dataset.chunk_size, size=int(samples_))
+        
+        if use_generator:
+            # Use from_generator for memory-efficient loading
+            print(f"Using from_generator approach for {dataset_name}")
+            gen_func = lambda: _create_dataset_generator(builder, cfg, dataset_name, ix)
+            generated_dataset = Dataset.from_generator(gen_func)
+            
+            # This sends the finalized data to the Hugging Face servers
+            generated_dataset.push_to_hub(cfg.dataset.to_name)
+            # Add samples from generated dataset to circular buffer
+            # for sample in generated_dataset:
+            #     cbuffer.add(
+            #         obs=sample["obs"],
+            #         action=sample["action"],
+            #         goal=sample["goal"],
+            #         goal_img=sample["goal_img"],
+            #         terminal=sample["terminal"],
+            #         pose=sample["pose"],
+            #     )
+        else:
+            # Use original direct loading approach
+            get_dataset_portion(builder, cbuffer, cfg, dataset_name=dataset_name, list_=ix)
 
 @hydra.main(config_path="./conf", config_name="64pix-pose")
 def my_main(cfg: DictConfig):
-    torch.manual_seed(cfg.r_seed)
-    log_dir = hydra.core.hydra_config.HydraConfig.get().runtime.output_dir
-    print ("cfg:", OmegaConf.to_yaml(cfg))
-    # device = 'cuda' if torch.cuda.is_available() else 'cpu'
-    # print("Using device: ", device, f"({torch.cuda.get_device_name(device)})" if torch.cuda.is_available() else "")
-    # cfg.device = device
-
-    wandb = None
-    if not cfg.testing:
-        import wandb
-        # start a new wandb run to track this script
-        wandb.init(
-            project=cfg.experiment.project,
-            # track hyperparameters and run metadata
-            config= OmegaConf.to_container(cfg),
-            name=cfg.experiment.name,
-        )
-        wandb.run.log_code(".")
-
-    tokenizer = None
-    text_model = None
-    if cfg.dataset.encode_with_t5: ## Load T5 model
-        # TODO:    
-        ## Load the T5 model and tokenizer
-        pass
-
-    from mini_shuffel_buffer import CircularBuffer, get_dataset_portion
-
-    # Load model based on configuration
-    if cfg.model.type == "convnet":
-        from grp_convnet import GRPConvNet
-        from grp_convnet import estimate_loss
-        model = GRPConvNet(cfg)
-        print(f"Using ConvNet model")
-    if cfg.model.type == "dense":
-        from grp_convnet import PoseOnlyNet
-        from grp_convnet import estimate_loss
-        model = PoseOnlyNet(cfg)
-        print(f"Using Dense model")
-    else:
-        from grp_model import GRP
-        from grp_model import estimate_loss
-        model = GRP(cfg)
-        print(f"Using Transformer model")
-    
-    from sim_eval import eval_model_in_sim
+    import numpy as np
+    # ------------
+    # Train and test splits
+    # Loading data
+    # create RLDS dataset builder
+    cfg.dataset.save_initial_dataset = True
+    cfg.dataset.load_dataset = False
+    # cfg.dataset.encode_with_t5 = True  # Also encode the text for the dataset.
+    cfg.n_embd = 512  # T5 small embedding size
+    cfg.device = "cpu"  # Use CPU for dataset creation to avoid GPU memory issues.
+    from grp_model import GRP
+    model = GRP(cfg)
     model.to(cfg.device)
-    cBuffer = CircularBuffer(cfg.dataset.buffer_size, cfg, model)
-    print(sum(p.numel() for p in model.parameters())/1e6, 'M parameters')
-    ## Print the amount of memory used by the model
-    print("Memory used by the model:", torch.cuda.memory_allocated(cfg.device) / 1e6, "MB")
-    ## Print the amount of memory used by the dataset cBuffer
-    from pympler import asizeof
-    cBuffer.print_mem_footprint()
+    np.random.seed(cfg.r_seed)
+    cbuffer = CircularBuffer(cfg.dataset.buffer_size, cfg, model)
 
-    # create a PyTorch optimizer
-    optimizer = torch.optim.AdamW(model.parameters(), lr=cfg.learning_rate, weight_decay=0.1)
-    # Select learning rate schedule based on configuration
-    schedule_type = getattr(cfg, 'lr_schedule', 'inverse_sqrt')  # default to inverse_sqrt
-    if schedule_type == 'linear':
-        import torch.optim.lr_scheduler as lr_scheduler
-        from torch.optim.lr_scheduler import LinearLR
-        scheduler = LinearLR(optimizer, start_factor=1.0, end_factor=0.1, total_iters=cfg.max_iters)
-    else:  # inverse_sqrt
-        lr_lambda = get_inverse_sqrt_lambda(optimizer, warmup_steps=1000)
-        scheduler = torch.optim.lr_scheduler.LambdaLR(optimizer, lr_lambda=lr_lambda)
+    print("Dataset shape:", len(cbuffer._dataset_tmp["img"]))
+    print("Dataset len:", cbuffer._count)
 
-    if "simple_env" in cfg.simEval:
-        import simpler_env
-        task_name = "widowx_carrot_on_plate"  # @param ["google_robot_pick_coke_can", "google_robot_move_near", "google_robot_open_drawer", "google_robot_close_drawer", "widowx_spoon_on_towel", "widowx_carrot_on_plate", "widowx_stack_cube", "widowx_put_eggplant_in_basket"]
-        if 'env' in locals():
-            print("Closing existing env")
-            env.close()
-            del env
-        env = simpler_env.make(task_name)
-        env_unwrapped = env.env.env.env ## Updated gymnasium wrapper adds lots of wrappers.
+    if cfg.dataset.save_initial_dataset and not cfg.dataset.use_generator:
+        print("Saving dataset to:", cfg.dataset.to_name)
+        ############# Save the dataset to a file
+        cbuffer.save(cfg.dataset.to_name)
 
-    shared_queue = Queue(maxsize=1)
-    data_thread = threading.Thread(target=cBuffer.shuffle, args=(shared_queue,))
-    data_thread.start()
-
-    # Initialize cProfile if enabled
-    profiler = None
-    if cfg.profiler.enable:
-        import cProfile, pstats
-        profiler = cProfile.Profile()
-        profiler.enable()
-
-    for iter in range(cfg.max_iters+1):
-        if iter % cfg.eval_interval == 0 or iter == cfg.max_iters - 1:
-            losses = estimate_loss(model, cBuffer)
-            print(f"step {iter}: train loss {losses['train']:.6f}, val loss {losses['val']:.6f}, memory {torch.cuda.memory_allocated(cfg.device) / 1e6:.2f} MB")
-            if not cfg.testing:
-                wandb.log({"train loss": losses['train'], "val loss": losses['val'],
-                        "memory": torch.cuda.memory_allocated(cfg.device) / 1e6,
-                        "buffer_size": asizeof.asizeof(cBuffer) / 1e6}, step=iter)
-            if cfg.profiler.enable:
-                stats = pstats.Stats(profiler)
-                stats.sort_stats(pstats.SortKey.TIME).print_stats(20)
-
-        if iter % cfg.data_shuffel_interval == 0 or iter == cfg.max_iters - 1:
-            path_ = "./miniGRP.pth"
-            torch.save(model, path_, pickle_module=dill) ## serialize class objects as well.
-            ## Save the grp_model.py file into the output folder as well
-            import shutil
-            shutil.copy(hydra.utils.get_original_cwd()+"/mini-grp/grp_model.py", log_dir)
-            print("Model saved to " + path_)
-        
-        if cfg.simEval and (iter % cfg.eval_vid_iters == 0) and (iter !=0): ## Do this eval infrequently because it takes a fiar bit of compute
-            if "simple_env" in cfg.simEval:
-                # Note: moved import of `eval_model_in_sim` into `my_main` to avoid circular imports
-                eval_model_in_sim(cfg, model, cfg.device, log_dir, env, env_unwrapped, 
-                            wandb=wandb, iter_=iter, tokenizer=tokenizer, text_model=text_model)
-            if "libero" in cfg.simEval:
-                from sim_eval import eval_libero
-                eval_libero(model, device=cfg.device, cfg=cfg, iter_=iter, log_dir=log_dir, 
-                            tokenizer=tokenizer, text_model=text_model, wandb=wandb)
-
-        if iter % cfg.data_shuffel_interval == 0 and iter > 0:
-            ## Update the dataset
-            shared_queue.put('shuffle')
-
-        xb, xp, xg, xgi, yb, last_action = cBuffer.get_batch_grp('train', cfg, cfg.batch_size)
-
-        # evaluate the loss
-        logits, loss = model(xb, xg, xgi, yb, pose=xp, last_action=last_action)
-        
-        # backward pass
-        loss.backward()
-        # max_norm is the maximum allowed norm of the gradients
-        torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=1.0)
-
-        if (iter + 1) % cfg.gradient_accumulation_steps == 0:
-            optimizer.step()
-            optimizer.zero_grad(set_to_none=True)
-
-    if not cfg.testing:
-        wandb.finish()
-    shared_queue.put(None)
-    data_thread.join()
-    
-    # Disable and print profiling results if enabled
-    if profiler is not None:
-        profiler.disable()
-        import pstats
-        stats = pstats.Stats(profiler)
-        stats.sort_stats('cumulative')
-        print("\n=== cProfile Results ===")
-        stats.print_stats(30)  # Print top 30 functions
-        stats.dump_stats("profile.prof")
-        print("Profile saved to profile.prof")
-    
-    return losses['val']
- 
 if __name__ == "__main__":
     results = my_main()
     print("results:", results)

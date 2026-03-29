@@ -1,0 +1,79 @@
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[Warning]: datasets path /opt/LIBERO/libero/libero/../datasets does not exist!
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+/opt/conda/envs/roble/lib/python3.10/site-packages/wandb/sdk/lib/import_hooks.py:246: DeprecationWarning: Deprecated since Python 3.4 and slated for removal in Python 3.12; use importlib.util.find_spec() instead
+  loader = importlib.find_loader(fullname, path)
+[1024/200000] return=-297.910 policy_loss=11.5630
+[2048/200000] return=-287.971 policy_loss=11.0602
+[3072/200000] return=-294.911 policy_loss=16.5380
+[4096/200000] return=-304.009 policy_loss=13.9075
+[5120/200000] return=-307.207 policy_loss=13.7816
+[6144/200000] return=-308.499 policy_loss=13.6628
+[7168/200000] return=-312.651 policy_loss=15.1305
+[8192/200000] return=-306.905 policy_loss=7.4306
+[9216/200000] return=-307.871 policy_loss=11.0668
+[10240/200000] return=-301.689 policy_loss=14.7430
+[11008/200000] return=-313.086 policy_loss=8.0438
+[12032/200000] return=-292.447 policy_loss=6.9105
+[13056/200000] return=-279.223 policy_loss=6.0234
+[14080/200000] return=-259.849 policy_loss=6.9786
+[15104/200000] return=-264.053 policy_loss=14.0373
+[16128/200000] return=-239.432 policy_loss=11.6993
+[17152/200000] return=-277.136 policy_loss=15.4703
+[18176/200000] return=-275.914 policy_loss=9.7860
+[19200/200000] return=-316.805 policy_loss=16.1643
+[20224/200000] return=-334.530 policy_loss=14.8342
+[21248/200000] return=-364.661 policy_loss=12.4299
+[22016/200000] return=-383.517 policy_loss=15.4608
+[23040/200000] return=-394.653 policy_loss=15.0068
+[24064/200000] return=-410.381 policy_loss=16.8217
+[25088/200000] return=-420.711 policy_loss=13.6321
+[26112/200000] return=-415.505 policy_loss=17.0931
+[27136/200000] return=-433.669 policy_loss=15.1810
+[28160/200000] return=-437.241 policy_loss=17.7935
+[29184/200000] return=-460.192 policy_loss=17.7466
+[30208/200000] return=-464.118 policy_loss=15.2433
+[31232/200000] return=-473.899 policy_loss=18.2117
+Exception ignored in: <function MjRenderContext.__del__ at 0x1487e2b12200>
+Traceback (most recent call last):
+  File "/opt/conda/envs/roble/lib/python3.10/site-packages/robosuite/utils/binding_utils.py", line 198, in __del__
+    self.con.free()
+AttributeError: 'MjRenderContextOffscreen' object has no attribute 'con'
+Traceback (most recent call last):
+  File "/project/60004/samuel/IFT6163_HW/hw3/train_dense_rl.py", line 381, in <module>
+    main()
+  File "/opt/conda/envs/roble/lib/python3.10/site-packages/hydra/main.py", line 90, in decorated_main
+    _run_hydra(
+  File "/opt/conda/envs/roble/lib/python3.10/site-packages/hydra/_internal/utils.py", line 389, in _run_hydra
+    _run_app(
+  File "/opt/conda/envs/roble/lib/python3.10/site-packages/hydra/_internal/utils.py", line 452, in _run_app
+    run_and_report(
+  File "/opt/conda/envs/roble/lib/python3.10/site-packages/hydra/_internal/utils.py", line 213, in run_and_report
+    return func()
+  File "/opt/conda/envs/roble/lib/python3.10/site-packages/hydra/_internal/utils.py", line 453, in <lambda>
+    lambda: hydra.run(
+  File "/opt/conda/envs/roble/lib/python3.10/site-packages/hydra/_internal/hydra.py", line 119, in run
+    ret = run_job(
+  File "/opt/conda/envs/roble/lib/python3.10/site-packages/hydra/core/utils.py", line 186, in run_job
+    ret.return_value = task_function(task_cfg)
+  File "/project/60004/samuel/IFT6163_HW/hw3/train_dense_rl.py", line 296, in main
+    next_obs, reward, done, truncated, info = env.step(action_np)
+  File "/project/60004/samuel/IFT6163_HW/hw3/../hw3/libero_env_fast.py", line 241, in step
+    obs_dict, _, done, info_env = self.env.step(action.tolist())
+  File "/opt/LIBERO/libero/libero/envs/env_wrapper.py", line 88, in step
+    return self.env.step(action)
+  File "/opt/LIBERO/libero/libero/envs/bddl_base_domain.py", line 809, in step
+    obs, reward, done, info = super().step(action)
+  File "/opt/conda/envs/roble/lib/python3.10/site-packages/robosuite/environments/base.py", line 390, in step
+    self._pre_action(action, policy_step)
+  File "/opt/LIBERO/libero/libero/envs/bddl_base_domain.py", line 815, in _pre_action
+    super()._pre_action(action, policy_step=policy_step)
+  File "/opt/conda/envs/roble/lib/python3.10/site-packages/robosuite/environments/robot_env.py", line 583, in _pre_action
+    robot.control(robot_action, policy_step=policy_step)
+  File "/opt/conda/envs/roble/lib/python3.10/site-packages/robosuite/robots/single_arm.py", line 256, in control
+    self.grip_action(gripper=self.gripper, gripper_action=gripper_action)
+  File "/opt/conda/envs/roble/lib/python3.10/site-packages/robosuite/robots/manipulator.py", line 31, in grip_action
+    self.sim.data.ctrl[actuator_idxs] = applied_gripper_action
+  File "/opt/conda/envs/roble/lib/python3.10/site-packages/robosuite/utils/binding_utils.py", line 567, in <lambda>
+    fget = lambda self, attr=attr: getattr(self._data, attr)
+KeyboardInterrupt
