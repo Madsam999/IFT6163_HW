@@ -17,7 +17,6 @@ import random
 from sim_eval import eval_libero
 from collections import deque
 
-
 # Factory function to instantiate the correct model
 def create_model(model_type, img_shape, action_dim, device, cfg):
     """
@@ -96,7 +95,29 @@ class ModelTrainingWrapper:
         elif self.model_type == 'simple':
             # TODO: Part 1.2 - Implement SimpleWorldModel training loss
             ## Compute MSE loss between predicted and target poses/rewards
-            pass
+            next_pose_pred, reward_pred = output 
+
+            # Targets (t+1 to end)
+            target_poses = poses[:, 1:]
+            target_rewards = rewards[:, 1:] 
+
+            # Predictions (start to t-1)
+            preds_pose = next_pose_pred[:, :-1]
+            preds_rewards = reward_pred[:, :-1]
+            
+            # --- THE FIX: Flatten both to ensure they match ---
+            # This turns [32, 15, 1] or [32, 15] into just [480]
+            pose_loss = torch.mean((preds_pose - target_poses) ** 2)
+            reward_loss = torch.mean((preds_rewards.reshape(-1) - target_rewards.reshape(-1)) ** 2)
+
+            total_loss = pose_loss + reward_loss
+
+            return {
+                "loss": total_loss,
+                "pose_loss": pose_loss.item(),
+                "reward_loss": reward_loss.item()
+            }
+            
 
 
 class LIBERODataset(torch.utils.data.Dataset):
@@ -244,6 +265,7 @@ class LIBERODatasetLeRobot(torch.utils.data.Dataset):
 def my_main(cfg: DictConfig):
     # Set device
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    print(device)
     wandb = None
     if not cfg.testing:
         import wandb
@@ -312,6 +334,7 @@ def my_main(cfg: DictConfig):
 
     batch_size = 32
     cfg.policy.sequence_length = 16
+    
     # Define optimizer and loss function
     optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
     
@@ -319,46 +342,116 @@ def my_main(cfg: DictConfig):
     scheduler = torch.optim.lr_scheduler.LinearLR(
         optimizer, 
         start_factor=1.0,  # Start at full learning rate
-        end_factor=0.01,    # End at 0 learning rate
+        end_factor=0.01,   # End at 0 learning rate
         total_iters=cfg.max_iters     # Decay over num_epochs
     )
     policy_loss = 0
 
-    # Training loop
-    for epoch in range(cfg.max_iters):
+    # 1. Define the custom collate function for 16-step slicing
+    def trajectory_collate_fn(batch):
+        seq_len = cfg.policy.sequence_length
+        batch_imgs, batch_acts, batch_rews, batch_dons, batch_poses = [], [], [], [], []
         
-        num_idx = np.arange(len(dataset))
-        np.random.shuffle(num_idx)
-        loss = 0.0
+        for img, act, rew, don, pos in batch:
+            t_max = img.shape[0]
+            
+            # Find a random starting point for the 16-step window
+            start = np.random.randint(0, max(1, t_max - seq_len + 1))
+            end = start + seq_len
+                
+            batch_imgs.append(img[start:end])
+            batch_acts.append(act[start:end])
+            batch_rews.append(rew[start:end])
+            batch_dons.append(don[start:end])
+            batch_poses.append(pos[start:end])
+            
+        # Stack into batch tensors
+        images = torch.stack(batch_imgs)
+        
+        # Permute images from (B, T, H, W, C) to (B, T, C, H, W) for PyTorch
+        if images.shape[-1] == 3:
+            images = images.permute(0, 1, 4, 2, 3)
+            
+        return (
+            images,
+            torch.stack(batch_acts),
+            torch.stack(batch_rews),
+            torch.stack(batch_dons),
+            torch.stack(batch_poses)
+        )
+
+    # 2. Initialize the PyTorch DataLoader
+    # IMPORTANT: If you use the HDF5 caching method, set num_workers=0 to prevent pickling errors
+    train_loader = torch.utils.data.DataLoader(
+        dataset, 
+        batch_size=batch_size, 
+        shuffle=True, 
+        num_workers=4,   # Uses 4 CPU cores to load data in the background
+        pin_memory=True, # Speeds up CPU to GPU transfer
+        collate_fn=trajectory_collate_fn
+    )
+
+    # 3. Clean Training loop
+    for epoch in range(cfg.max_iters):
         batch_counter = 0
         
-        # Process data in batches
-        for batch_start in range(0, len(num_idx), batch_size):
-            batch_end = min(batch_start + batch_size, len(num_idx))
-            batch_indices = num_idx[batch_start:batch_end]
-            # Collect sequences for the batch
-            # [TODO]
-            # TODO:    
-            ## Implement data loading and training step for the batch
-            print(f'Epoch [{epoch+1}/{cfg.max_iters }], Batch [{batch_counter}/{(len(dataset) + batch_size - 1) // batch_size}], Loss: {batch_loss.item():.4f}, policy_loss: {policy_loss:.4f}')
+        # Process data cleanly in batches yielded by the background workers
+        for images, actions, rewards, dones, poses in train_loader:
+            
+            # Move all tensors to GPU
+            images = images.to(device).float()
+            actions = actions.to(device).float()
+            rewards = rewards.to(device).float()
+            dones = dones.to(device).float()
+            poses = poses.to(device).float()
+
+            # Training Step
+            optimizer.zero_grad()
+            output = model_wrapper.forward_pass(images, poses, actions)
+            loss_dict = model_wrapper.compute_loss(output, images, rewards, dones, poses, actions)
+            
+            # This defines the 'batch_loss' variable your print statement is looking for
+            batch_loss = loss_dict['loss'] 
+            
+            batch_loss.backward()
+            optimizer.step()
+            batch_counter += 1
+
+            if wandb is not None:
+                # Create a clean dict of sub-losses
+                metrics = {
+                    "train/loss": batch_loss.item() if torch.is_tensor(batch_loss) else batch_loss,
+                    "train/lr": scheduler.get_last_lr()[0],
+                    "epoch": epoch + 1
+                }
+    
+                # Add other items from loss_dict safely
+                for k, v in loss_dict.items():
+                    if k != 'loss':
+                        # Check if it has the .item() method, otherwise just use the value
+                        metrics[f"train/{k}"] = v.item() if hasattr(v, 'item') else v
+            
+                wandb.log(metrics)
+
+            print(f'Epoch [{epoch+1}/{cfg.max_iters}], Batch [{batch_counter}/{len(train_loader)}], Loss: {batch_loss.item():.4f}, policy_loss: {policy_loss:.4f}')
 
         # save the model checkpoint
         if epoch % cfg.eval_vid_iters == 0:
             torch.save(model.state_dict(), f'model_epoch_{epoch+1}_batch_{batch_counter}.pth', pickle_module=dill)
-                # Evaluate the model using eval_libero from sim_eval
+            # Evaluate the model using eval_libero from sim_eval
             print("[info] Starting evaluation on LIBERO tasks...")
-            data = eval_libero(planner, device, cfg, iter_=epoch, log_dir="./", 
-                               wandb=wandb)
+            data = eval_libero(planner, device, cfg, iter_=epoch, log_dir="./", wandb=wandb)
+            
             if cfg.use_random_data:
                 # Add new random trajectories to the buffer
                 for traj in data['traj']:
-                    dones = np.zeros_like(traj['rewards'])
-                    dones[-1] = 1
+                    dones_arr = np.zeros_like(traj['rewards'])
+                    dones_arr[-1] = 1
                     ## observations need to be changed to channel first
                     observations = np.array(traj['observations'])  # (T, 1, H, W, C) -> (T, H, W, C)
                     observations = np.transpose(observations, (0, 3, 1, 2))  # (T, H, W, C) -> (T, C, H, W)
                     dataset.add_trajectory(observations, np.array(traj['actions']),
-                                           np.array(traj['rewards']), np.array(dones), np.array(traj['poses']))
+                                           np.array(traj['rewards']), np.array(dones_arr), np.array(traj['poses']))
                 print(f"[info] Added new random trajectories to buffer. Current buffer size: {len(dataset)}")
         
         # Step the learning rate scheduler after each epoch

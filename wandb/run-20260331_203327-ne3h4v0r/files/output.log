@@ -1,0 +1,14 @@
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[Warning]: datasets path /opt/LIBERO/libero/libero/../datasets does not exist!
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[INFO] Model input_d=128, lin_map_pose input=7, obs_dim=13
+/opt/conda/envs/roble/lib/python3.10/site-packages/wandb/sdk/lib/import_hooks.py:246: DeprecationWarning: Deprecated since Python 3.4 and slated for removal in Python 3.12; use importlib.util.find_spec() instead
+  loader = importlib.find_loader(fullname, path)
+Error executing job with overrides: ['experiment.name=hw3_transformer_grpo_gt_fixed', 'r_seed=0', 'init_checkpoint=hw3/miniGRP_Model/miniGRP.pth', 'rl.algorithm=grpo', 'sim.task_set=libero_spatial', 'sim.eval_tasks=[9]']
+Traceback (most recent call last):
+  File "/project/60004/samuel/IFT6163_HW/hw3/train_transformer_rl.py", line 566, in main
+    group = collect_grpo_group(
+  File "/project/60004/samuel/IFT6163_HW/hw3/train_transformer_rl.py", line 188, in collect_grpo_group
+    obs_dict = env.env._get_obs()
+AttributeError: 'DenseRewardEnv' object has no attribute '_get_obs'
+Set the environment variable HYDRA_FULL_ERROR=1 for a complete stack trace.

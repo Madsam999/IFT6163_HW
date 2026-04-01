@@ -1,0 +1,202 @@
+dataset:
+  to_name: gberseth/libero_spatial_0
+  num_episodes: 0
+  chunk_size: 100
+  buffer_size: 50000
+  encode_with_t5: false
+  t5_version: t5-small
+  chars_list:
+  - ' '
+  - ','
+  - .
+  - '0'
+  - '1'
+  - '2'
+  - '3'
+  - '4'
+  - '5'
+  - '6'
+  - '7'
+  - '8'
+  - '9'
+  - '!'
+  - '?'
+  - '"'
+  - ''''
+  - (
+  - )
+  - '-'
+  - _
+  - ':'
+  - ;
+  - '@'
+  - '#'
+  - $
+  - '%'
+  - '&'
+  - '*'
+  - +
+  - '='
+  - <
+  - '>'
+  - /
+  - \\
+  - '|'
+  - '~'
+  - '`'
+  - A
+  - B
+  - C
+  - D
+  - E
+  - F
+  - G
+  - H
+  - I
+  - J
+  - K
+  - L
+  - M
+  - 'N'
+  - O
+  - P
+  - Q
+  - R
+  - S
+  - T
+  - U
+  - V
+  - W
+  - X
+  - 'Y'
+  - Z
+  - a
+  - b
+  - c
+  - d
+  - e
+  - f
+  - g
+  - h
+  - i
+  - j
+  - k
+  - l
+  - m
+  - 'n'
+  - o
+  - p
+  - q
+  - r
+  - s
+  - t
+  - u
+  - v
+  - w
+  - x
+  - 'y'
+  - z
+  load_dataset: true
+  download_all: false
+  save_initial_dataset: false
+  use_generator: false
+  use_init_state: true
+  dataset_indicies:
+    /network/projects/real-g-grp/modified_libero_rlds/libero_90_no_noops/1.0.0:
+      start: 0
+      size: 1000000
+      weight: 1.0
+      dataset_key: libero_dataset_transform
+  recompute_normalizations: false
+  action_scaling: 0.5,
+  action_mean:
+  - 0.20769862830638885
+  - 0.1172831580042839
+  - -0.1328626126050949
+  - 0.006111515685915947
+  - -0.0030502916779369116
+  - -0.036297377198934555
+  - 0.0
+  action_std:
+  - 0.6475179195404053
+  - 0.3413824141025543
+  - 0.8427339792251587
+  - 0.04650535434484482
+  - 0.09098237007856369
+  - 0.0969737097620964
+  - 1.4071979522705078
+  pose_mean:
+  - -0.025086650624871254
+  - 0.13407054543495178
+  - 1.0256017446517944
+  - 0.9899610877037048
+  - -0.09843368083238602
+  - -0.023222042247653008
+  - 0.02138819918036461
+  pose_std:
+  - 0.12043842673301697
+  - 0.07237331569194794
+  - 0.12468966096639633
+  - 0.01539379358291626
+  - 0.13247355818748474
+  - 0.02883189357817173
+  - 0.023439111188054085
+experiment:
+  name: mini_grp
+  project: mini-grp
+  description: simple env with 64pix images and pose data
+model:
+  type: transformer
+batch_size: 256
+max_block_size: 16
+vocab_size: 32
+n_patches: 8
+patch_size: 8
+max_iters: 25000
+eval_interval: 100
+learning_rate: 0.0003
+lr_schedule: linear
+eval_iters: 5
+policy:
+  action_stacking: 1
+  obs_stacking: 1
+  use_image_augmentations: false
+  dtype: float32
+  use_pose_data: 1
+  random_masking_enabled: false
+  use_last_action: false
+  add_noise_to_state: true
+  state_noise_std: 0.01
+testing: true
+eval_vid_iters: 2500
+gradient_accumulation_steps: 1
+simEval:
+- libero_fast
+sim:
+  eval_episodes: 20
+  eval_tasks:
+  - 9
+  episode length: 500
+  task_set: libero_spatial
+  libero_init_state_file: /openvla/experiments/robot/libero/libero_spatial_init_states_and_goals.hdf
+  libero_init_state_hf_repo: gberseth/libero_spatial_init_states
+r_seed: 1337
+device: cuda
+n_embd: 512
+n_head: 16
+n_blocks: 4
+dropout: 0.2
+action_dim: 7
+load_action_bounds: true
+image_shape:
+- 64
+- 64
+- 3
+data_shuffel_interval: 1000
+profiler:
+  enable: false
+  params:
+    profile_memory: true
+    with_stack: true
+    use_cuda: true
+checkpoint: hw3//outputs/hw3_dense_ppo_seed0/dense_ppo_final.pth

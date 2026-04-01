@@ -37,7 +37,10 @@ training:
 
 grpo:
   group_size: 8              # number of trajectories per initial state
-  num_groups: 16             # number of initial states per update
+  num_groups: 16             # number of initial states per update (ground-truth GRPO)
+  horizon: 50                # imagination horizon for world-model GRPO (Part 2d)
+
+world_model_checkpoint: ???  # required for grpo_worldmodel: path to HW2 SimpleWorldModel .pth
 
 value:
   hidden_dim: 256

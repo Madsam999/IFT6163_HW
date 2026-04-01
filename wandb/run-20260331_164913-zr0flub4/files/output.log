@@ -1,0 +1,17 @@
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[Warning]: datasets path /opt/LIBERO/libero/libero/../datasets does not exist!
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+Error executing job with overrides: ['experiment.name=hw3_transformer_ppo_fixed', 'r_seed=0', 'init_checkpoint=miniGRP_Model/miniGRP.pth', 'rl.algorithm=ppo', 'sim.task_set=libero_spatial', 'sim.eval_tasks=[9]']
+Traceback (most recent call last):
+  File "/project/60004/samuel/IFT6163_HW/hw3/train_transformer_rl.py", line 480, in main
+    policy = TransformerPolicyWrapper(cfg.init_checkpoint, device, cfg, obs_dim=obs_dim)
+  File "/project/60004/samuel/IFT6163_HW/hw3/train_transformer_rl.py", line 78, in __init__
+    self.model = torch.load(checkpoint_path, map_location=device, pickle_module=dill)
+  File "/opt/conda/envs/roble/lib/python3.10/site-packages/torch/serialization.py", line 1319, in load
+    with _open_file_like(f, "rb") as opened_file:
+  File "/opt/conda/envs/roble/lib/python3.10/site-packages/torch/serialization.py", line 659, in _open_file_like
+    return _open_file(name_or_buffer, mode)
+  File "/opt/conda/envs/roble/lib/python3.10/site-packages/torch/serialization.py", line 640, in __init__
+    super().__init__(open(name, mode))
+FileNotFoundError: [Errno 2] No such file or directory: 'miniGRP_Model/miniGRP.pth'
+Set the environment variable HYDRA_FULL_ERROR=1 for a complete stack trace.

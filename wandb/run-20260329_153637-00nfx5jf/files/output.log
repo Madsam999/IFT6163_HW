@@ -1,0 +1,114 @@
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[Warning]: datasets path /opt/LIBERO/libero/libero/../datasets does not exist!
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[INFO] Model input_d=128, lin_map_pose input=7, obs_dim=13
+False  dreamerV3.py
+[WorldModel] Loaded 38/38 keys from checkpoint
+/opt/conda/envs/roble/lib/python3.10/site-packages/wandb/sdk/lib/import_hooks.py:246: DeprecationWarning: Deprecated since Python 3.4 and slated for removal in Python 3.12; use importlib.util.find_spec() instead
+  loader = importlib.find_loader(fullname, path)
+[GRPO-WM] horizon=50, group_size=8
+[GRPO-WM 800] imagined_return=1.416  policy_loss=-0.0993  return_std=0.6886
+[GRPO-WM 1600] imagined_return=1.394  policy_loss=-0.0993  return_std=0.8575
+[GRPO-WM 2400] imagined_return=1.328  policy_loss=-0.0993  return_std=0.6231
+[GRPO-WM 3200] imagined_return=1.343  policy_loss=-0.0993  return_std=0.4798
+[GRPO-WM 4000] imagined_return=1.359  policy_loss=-0.0993  return_std=0.3000
+[GRPO-WM 4800] imagined_return=1.391  policy_loss=-0.0993  return_std=0.5833
+[GRPO-WM 5600] imagined_return=1.409  policy_loss=-0.0993  return_std=0.6694
+[GRPO-WM 6400] imagined_return=1.413  policy_loss=-0.0993  return_std=0.7396
+[GRPO-WM 7200] imagined_return=1.454  policy_loss=-0.0993  return_std=0.7456
+[GRPO-WM 8000] imagined_return=1.436  policy_loss=-0.0993  return_std=0.4705
+[GRPO-WM 8800] imagined_return=1.444  policy_loss=-0.0993  return_std=0.4674
+[GRPO-WM 9600] imagined_return=1.448  policy_loss=-0.0993  return_std=0.7122
+[GRPO-WM 10400] imagined_return=1.509  policy_loss=-0.0993  return_std=0.8942
+[GRPO-WM 11200] imagined_return=1.519  policy_loss=-0.0993  return_std=0.4022
+[GRPO-WM 12000] imagined_return=1.513  policy_loss=-0.0993  return_std=0.5334
+[GRPO-WM 12800] imagined_return=1.504  policy_loss=-0.0993  return_std=0.4552
+[GRPO-WM 13600] imagined_return=1.475  policy_loss=-0.0993  return_std=0.3192
+[GRPO-WM 14400] imagined_return=1.501  policy_loss=-0.0993  return_std=1.8416
+[GRPO-WM 15200] imagined_return=1.486  policy_loss=-0.0993  return_std=0.8839
+[GRPO-WM 16000] imagined_return=1.494  policy_loss=-0.0993  return_std=0.7504
+[GRPO-WM 16800] imagined_return=1.485  policy_loss=-0.0993  return_std=0.2722
+[GRPO-WM 17600] imagined_return=1.475  policy_loss=-0.0993  return_std=0.2065
+[GRPO-WM 18400] imagined_return=1.465  policy_loss=-0.0993  return_std=0.2598
+[GRPO-WM 19200] imagined_return=1.491  policy_loss=-0.0993  return_std=1.0187
+[GRPO-WM 20000] imagined_return=1.500  policy_loss=-0.0993  return_std=0.8715
+[GRPO-WM 20800] imagined_return=1.484  policy_loss=-0.0993  return_std=0.4958
+[GRPO-WM 21600] imagined_return=1.513  policy_loss=-0.0993  return_std=1.1628
+[GRPO-WM 22400] imagined_return=1.502  policy_loss=-0.0993  return_std=0.5163
+[GRPO-WM 23200] imagined_return=1.490  policy_loss=-0.0993  return_std=0.7293
+[GRPO-WM 24000] imagined_return=1.528  policy_loss=-0.0993  return_std=0.1472
+[GRPO-WM 24800] imagined_return=1.555  policy_loss=-0.0993  return_std=0.5052
+[GRPO-WM 25600] imagined_return=1.572  policy_loss=-0.0993  return_std=0.5354
+[GRPO-WM 26400] imagined_return=1.604  policy_loss=-0.0993  return_std=1.2712
+[GRPO-WM 27200] imagined_return=1.585  policy_loss=-0.0993  return_std=0.8576
+[GRPO-WM 28000] imagined_return=1.583  policy_loss=-0.0993  return_std=0.5920
+[GRPO-WM 28800] imagined_return=1.630  policy_loss=-0.0993  return_std=1.4460
+[GRPO-WM 29600] imagined_return=1.617  policy_loss=-0.0993  return_std=0.3691
+[GRPO-WM 30400] imagined_return=1.575  policy_loss=-0.0993  return_std=0.3085
+[GRPO-WM 31200] imagined_return=1.593  policy_loss=-0.0994  return_std=1.2733
+[GRPO-WM 32000] imagined_return=1.574  policy_loss=-0.0994  return_std=0.5188
+[GRPO-WM 32800] imagined_return=1.583  policy_loss=-0.0993  return_std=0.5431
+[GRPO-WM 33600] imagined_return=1.580  policy_loss=-0.0994  return_std=0.4814
+[GRPO-WM 34400] imagined_return=1.506  policy_loss=-0.0994  return_std=0.5294
+[GRPO-WM 35200] imagined_return=1.481  policy_loss=-0.0994  return_std=1.0021
+[GRPO-WM 36000] imagined_return=1.478  policy_loss=-0.0994  return_std=0.3949
+[GRPO-WM 36800] imagined_return=1.428  policy_loss=-0.0994  return_std=0.3653
+[GRPO-WM 37600] imagined_return=1.432  policy_loss=-0.0994  return_std=0.6585
+[GRPO-WM 38400] imagined_return=1.458  policy_loss=-0.0994  return_std=0.2102
+[GRPO-WM 39200] imagined_return=1.430  policy_loss=-0.0994  return_std=0.2780
+[GRPO-WM 40000] imagined_return=1.404  policy_loss=-0.0994  return_std=0.1826
+[GRPO-WM 40800] imagined_return=1.388  policy_loss=-0.0994  return_std=0.5117
+[GRPO-WM 41600] imagined_return=1.388  policy_loss=-0.0994  return_std=0.5225
+[GRPO-WM 42400] imagined_return=1.394  policy_loss=-0.0994  return_std=0.2036
+[GRPO-WM 43200] imagined_return=1.397  policy_loss=-0.0994  return_std=0.2218
+[GRPO-WM 44000] imagined_return=1.385  policy_loss=-0.0994  return_std=0.3397
+[GRPO-WM 44800] imagined_return=1.396  policy_loss=-0.0994  return_std=0.4792
+[GRPO-WM 45600] imagined_return=1.419  policy_loss=-0.0994  return_std=1.2553
+[GRPO-WM 46400] imagined_return=1.414  policy_loss=-0.0994  return_std=0.3610
+[GRPO-WM 47200] imagined_return=1.418  policy_loss=-0.0994  return_std=0.1638
+Traceback (most recent call last):
+  File "/project/60004/samuel/IFT6163_HW/hw3/train_transformer_rl.py", line 743, in <module>
+    # Save final checkpoint
+  File "/opt/conda/envs/roble/lib/python3.10/site-packages/hydra/main.py", line 90, in decorated_main
+    _run_hydra(
+  File "/opt/conda/envs/roble/lib/python3.10/site-packages/hydra/_internal/utils.py", line 389, in _run_hydra
+    _run_app(
+  File "/opt/conda/envs/roble/lib/python3.10/site-packages/hydra/_internal/utils.py", line 452, in _run_app
+    run_and_report(
+  File "/opt/conda/envs/roble/lib/python3.10/site-packages/hydra/_internal/utils.py", line 213, in run_and_report
+    return func()
+  File "/opt/conda/envs/roble/lib/python3.10/site-packages/hydra/_internal/utils.py", line 453, in <lambda>
+    lambda: hydra.run(
+  File "/opt/conda/envs/roble/lib/python3.10/site-packages/hydra/_internal/hydra.py", line 119, in run
+    ret = run_job(
+  File "/opt/conda/envs/roble/lib/python3.10/site-packages/hydra/core/utils.py", line 186, in run_job
+    ret.return_value = task_function(task_cfg)
+  File "/project/60004/samuel/IFT6163_HW/hw3/train_transformer_rl.py", line 698, in main
+    group_size  = int(cfg.grpo.group_size)
+  File "/project/60004/samuel/IFT6163_HW/hw3/train_transformer_rl.py", line 480, in grpo_worldmodel_update
+    world_model.reset_rssm_state()
+  File "/project/60004/samuel/IFT6163_HW/hw3/train_transformer_rl.py", line 165, in get_action
+    dist = self.forward(obs_t)
+  File "/project/60004/samuel/IFT6163_HW/hw3/train_transformer_rl.py", line 152, in forward
+    mean = self._compute_action_mean(obs)
+  File "/project/60004/samuel/IFT6163_HW/hw3/train_transformer_rl.py", line 142, in _compute_action_mean
+    x = block(x)
+  File "/opt/conda/envs/roble/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1736, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "/opt/conda/envs/roble/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1747, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/project/60004/samuel/IFT6163_HW/hw3/grp_model.py", line 95, in forward
+    x = x + self.sa(self.ln1(x), mask)
+  File "/opt/conda/envs/roble/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1736, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "/opt/conda/envs/roble/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1747, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/project/60004/samuel/IFT6163_HW/hw3/grp_model.py", line 66, in forward
+    out = torch.cat([h(x, mask) for h in self.heads], dim=-1)
+  File "/project/60004/samuel/IFT6163_HW/hw3/grp_model.py", line 66, in <listcomp>
+    out = torch.cat([h(x, mask) for h in self.heads], dim=-1)
+  File "/opt/conda/envs/roble/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1736, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "/opt/conda/envs/roble/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1747, in _call_impl
+    return forward_call(*args, **kwargs)
+KeyboardInterrupt

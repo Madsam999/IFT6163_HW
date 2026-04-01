@@ -1,0 +1,7 @@
+- experiment.name=hw3_transformer_grpo_wm_fixed
+- r_seed=0
+- init_checkpoint=hw3/miniGRP_Model/miniGRP.pth
+- world_model_checkpoint=hw3/world_model/model_epoch_41_batch_15.pth
+- rl.algorithm=grpo_worldmodel
+- sim.task_set=libero_spatial
+- sim.eval_tasks=[9]

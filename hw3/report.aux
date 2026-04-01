@@ -1,0 +1,60 @@
+\relax 
+\providecommand\hyper@newdestlabel[2]{}
+\providecommand\HyperFirstAtBeginDocument{\AtBeginDocument}
+\HyperFirstAtBeginDocument{\ifx\hyper@anchor\@undefined
+\global\let\oldcontentsline\contentsline
+\gdef\contentsline#1#2#3#4{\oldcontentsline{#1}{#2}{#3}}
+\global\let\oldnewlabel\newlabel
+\gdef\newlabel#1#2{\newlabelxx{#1}#2}
+\gdef\newlabelxx#1#2#3#4#5#6{\oldnewlabel{#1}{{#2}{#3}}}
+\AtEndDocument{\ifx\hyper@anchor\@undefined
+\let\contentsline\oldcontentsline
+\let\newlabel\oldnewlabel
+\fi}
+\fi}
+\global\let\hyper@last\relax 
+\gdef\HyperFirstAtBeginDocument#1{#1}
+\providecommand\HyField@AuxAddToFields[1]{}
+\providecommand\HyField@AuxAddToCoFields[2]{}
+\@writefile{toc}{\contentsline {section}{\numberline {1}Part 1: Dense Policy with PPO}{1}{section.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {1.1}Reward Function}{1}{subsection.1.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {1.2}PPO Implementation}{1}{subsection.1.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {1.3}Results}{2}{subsection.1.3}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {1}{\ignorespaces Dense PPO results across three seeds, LIBERO Spatial Task 9.\relax }}{2}{table.caption.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {2}Part 2: Fine-Tuning a Transformer Policy with RL}{2}{section.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.1}Architecture and Initialization}{2}{subsection.2.1}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {1}{\ignorespaces Dense PPO episode return over training for three seeds (LIBERO Spatial Task\nobreakspace  {}9). Seed\nobreakspace  {}0 (darkest) achieves the best final return of $-38.4$; seeds\nobreakspace  {}1 and\nobreakspace  {}2 converge to $-54.9$ and $-52.1$ respectively. The shaded band shows the inter-seed range.\relax }}{3}{figure.caption.2}\protected@file@percent }
+\providecommand*\caption@xref[2]{\@setref\relax\@undefined{#1}}
+\newlabel{fig:dense_ppo}{{1}{3}{Dense PPO episode return over training for three seeds (LIBERO Spatial Task~9). Seed~0 (darkest) achieves the best final return of $-38.4$; seeds~1 and~2 converge to $-54.9$ and $-52.1$ respectively. The shaded band shows the inter-seed range.\relax }{figure.caption.2}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.2}(a) PPO Fine-Tuning}{3}{subsection.2.2}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {2}{\ignorespaces Transformer PPO vs. Dense PPO comparison.\relax }}{3}{table.caption.4}\protected@file@percent }
+\newlabel{fig:wb_seed0_return}{{2a}{4}{Episode return — seed~0 (orange).\relax }{figure.caption.3}{}}
+\newlabel{sub@fig:wb_seed0_return}{{a}{4}{Episode return — seed~0 (orange).\relax }{figure.caption.3}{}}
+\newlabel{fig:wb_seed0_entropy}{{2b}{4}{Policy entropy — seed~0 (U-shaped: 9.9 $\to $ 8.5 at 100k $\to $ 9.1 at 200k).\relax }{figure.caption.3}{}}
+\newlabel{sub@fig:wb_seed0_entropy}{{b}{4}{Policy entropy — seed~0 (U-shaped: 9.9 $\to $ 8.5 at 100k $\to $ 9.1 at 200k).\relax }{figure.caption.3}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {2}{\ignorespaces WandB training metrics for Dense PPO seed\nobreakspace  {}0. The entropy curve shows the policy first specialising (decreasing entropy) then partially re-exploring, consistent with the oscillatory return curve.\relax }}{4}{figure.caption.3}\protected@file@percent }
+\newlabel{fig:wb_seed0}{{2}{4}{WandB training metrics for Dense PPO seed~0. The entropy curve shows the policy first specialising (decreasing entropy) then partially re-exploring, consistent with the oscillatory return curve.\relax }{figure.caption.3}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.3}(b/c) GRPO with Ground-Truth Resets}{4}{subsection.2.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {2.3.1}How sampled trajectories differ}{4}{subsubsection.2.3.1}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {3}{\ignorespaces Required Part\nobreakspace  {}2 composite figure. \textbf  {Top row:} sampled frames from the best-performing checkpoint (transformer policy, GRPO-GT) during a LIBERO Spatial Task\nobreakspace  {}9 episode. \textbf  {Bottom:} shaped reward (sum of the two Euclidean distance penalties, eq.\nobreakspace  {}1) computed on the states visited during that episode. The reward improves monotonically once the EEF approaches the bowl, confirming that the reward function provides useful shaping signal.\relax }}{5}{figure.caption.5}\protected@file@percent }
+\newlabel{fig:composite}{{3}{5}{Required Part~2 composite figure. \textbf {Top row:} sampled frames from the best-performing checkpoint (transformer policy, GRPO-GT) during a LIBERO Spatial Task~9 episode. \textbf {Bottom:} shaped reward (sum of the two Euclidean distance penalties, eq.~1) computed on the states visited during that episode. The reward improves monotonically once the EEF approaches the bowl, confirming that the reward function provides useful shaping signal.\relax }{figure.caption.5}{}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {2.3.2}Loss calculation}{5}{subsubsection.2.3.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {2.3.3}Collection, storage, and sampling}{5}{subsubsection.2.3.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {2.3.4}Hyperparameter changes relative to PPO}{6}{subsubsection.2.3.4}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {2.3.5}Results}{6}{subsubsection.2.3.5}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.4}(d) GRPO with World Model (DreamerV3)}{6}{subsection.2.4}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {2.4.1}World model architecture}{6}{subsubsection.2.4.1}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {3}{\ignorespaces DreamerV3 checkpoint architecture (38 keys, all matched).\relax }}{6}{table.caption.6}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {2.4.2}Trajectory generation and usage in training}{7}{subsubsection.2.4.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {2.4.3}Reward signal and issues}{7}{subsubsection.2.4.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {2.4.4}Results}{8}{subsubsection.2.4.4}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {4}{\ignorespaces GRPO-WM training metrics over 200k environment steps.\relax }}{8}{table.caption.7}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {3}Comparing the Three Policy Families}{8}{section.3}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {5}{\ignorespaces Summary of all experiments. Imagined returns for GRPO-WM are not comparable to real-env returns.\relax }}{8}{table.caption.10}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {4}{\ignorespaces GRPO with DreamerV3 world model over 200k steps. \textbf  {Top:} per-update imagined return and 15-point rolling mean (solid purple). The rolling mean rises from $\approx 1.3$ to a peak of $\approx 2.1$ around step 50k, then settles at $\approx 1.9$, confirming that the policy improves under the world-model reward. \textbf  {Bottom:} group return standard deviation, which measures how much the 8 sampled trajectories diverge. High std (up to 3.7) indicates that the world model produces diverse reward signals across the group, providing informative relative advantages for GRPO.\relax }}{9}{figure.caption.8}\protected@file@percent }
+\newlabel{fig:grpo_wm}{{4}{9}{GRPO with DreamerV3 world model over 200k steps. \textbf {Top:} per-update imagined return and 15-point rolling mean (solid purple). The rolling mean rises from $\approx 1.3$ to a peak of $\approx 2.1$ around step 50k, then settles at $\approx 1.9$, confirming that the policy improves under the world-model reward. \textbf {Bottom:} group return standard deviation, which measures how much the 8 sampled trajectories diverge. High std (up to 3.7) indicates that the world model produces diverse reward signals across the group, providing informative relative advantages for GRPO.\relax }{figure.caption.8}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {4}Known Failed Run / Ablation}{9}{section.4}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {5}{\ignorespaces All real-environment methods compared. The shaded blue band shows the Dense PPO range across seeds\nobreakspace  {}0--2. Dense PPO seed\nobreakspace  {}0 (dashed blue) and both transformer PPO runs (solid red lr=1e-5, dashed red lr=3e-4) are overlaid, together with Transformer GRPO-GT (solid green). The transformer runs all hover near $-28$ to $-30$ throughout, while Dense PPO starts at $-100$ but catches up by $\sim $150k steps, confirming that pre-trained initialization is more sample-efficient early but does not unlock further RL improvement.\relax }}{10}{figure.caption.9}\protected@file@percent }
+\newlabel{fig:all_methods}{{5}{10}{All real-environment methods compared. The shaded blue band shows the Dense PPO range across seeds~0--2. Dense PPO seed~0 (dashed blue) and both transformer PPO runs (solid red lr=1e-5, dashed red lr=3e-4) are overlaid, together with Transformer GRPO-GT (solid green). The transformer runs all hover near $-28$ to $-30$ throughout, while Dense PPO starts at $-100$ but catches up by $\sim $150k steps, confirming that pre-trained initialization is more sample-efficient early but does not unlock further RL improvement.\relax }{figure.caption.9}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {5}AI Use Disclosure}{10}{section.5}\protected@file@percent }
+\gdef \@abspage@last{11}

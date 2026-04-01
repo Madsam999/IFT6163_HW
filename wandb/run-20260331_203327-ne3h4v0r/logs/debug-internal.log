@@ -1,0 +1,161 @@
+2026-03-31 20:33:27,430 INFO    StreamThr :20177 [internal.py:wandb_internal():90] W&B internal server running at pid: 20177, started at: 2026-03-31 20:33:27.429237
+2026-03-31 20:33:27,432 DEBUG   HandlerThread:20177 [handler.py:handle_request():141] handle_request: status
+2026-03-31 20:33:27,433 DEBUG   SenderThread:20177 [sender.py:send_request():316] send_request: status
+2026-03-31 20:33:27,435 DEBUG   SenderThread:20177 [sender.py:send():302] send: header
+2026-03-31 20:33:27,435 INFO    WriterThread:20177 [datastore.py:open_for_write():75] open: /project/60004/samuel/IFT6163_HW/wandb/run-20260331_203327-ne3h4v0r/run-ne3h4v0r.wandb
+2026-03-31 20:33:27,442 DEBUG   SenderThread:20177 [sender.py:send():302] send: run
+2026-03-31 20:33:27,792 DEBUG   HandlerThread:20177 [handler.py:handle_request():141] handle_request: check_version
+2026-03-31 20:33:27,796 INFO    SenderThread:20177 [dir_watcher.py:__init__():216] watching files in: /project/60004/samuel/IFT6163_HW/wandb/run-20260331_203327-ne3h4v0r/files
+2026-03-31 20:33:27,796 INFO    SenderThread:20177 [sender.py:_start_run_threads():913] run started: ne3h4v0r with start time 1774989207.426445
+2026-03-31 20:33:27,796 DEBUG   SenderThread:20177 [sender.py:send():302] send: summary
+2026-03-31 20:33:27,797 INFO    SenderThread:20177 [sender.py:_save_file():1156] saving file wandb-summary.json with policy end
+2026-03-31 20:33:27,798 DEBUG   SenderThread:20177 [sender.py:send_request():316] send_request: check_version
+2026-03-31 20:33:27,940 DEBUG   HandlerThread:20177 [handler.py:handle_request():141] handle_request: run_start
+2026-03-31 20:33:27,949 DEBUG   HandlerThread:20177 [meta.py:__init__():35] meta init
+2026-03-31 20:33:27,950 DEBUG   HandlerThread:20177 [meta.py:__init__():50] meta init done
+2026-03-31 20:33:27,950 DEBUG   HandlerThread:20177 [meta.py:probe():216] probe
+2026-03-31 20:33:27,957 DEBUG   HandlerThread:20177 [meta.py:_setup_git():206] setup git
+2026-03-31 20:33:27,971 DEBUG   HandlerThread:20177 [meta.py:_setup_git():213] setup git done
+2026-03-31 20:33:27,971 DEBUG   HandlerThread:20177 [meta.py:_save_pip():54] save pip
+2026-03-31 20:33:27,973 DEBUG   HandlerThread:20177 [meta.py:_save_pip():68] save pip done
+2026-03-31 20:33:27,973 DEBUG   HandlerThread:20177 [meta.py:_save_conda():75] save conda
+2026-03-31 20:33:28,744 DEBUG   HandlerThread:20177 [meta.py:_save_conda():85] save conda done
+2026-03-31 20:33:28,744 DEBUG   HandlerThread:20177 [meta.py:probe():254] probe done
+2026-03-31 20:33:28,798 DEBUG   SenderThread:20177 [sender.py:send():302] send: files
+2026-03-31 20:33:28,798 INFO    SenderThread:20177 [sender.py:_save_file():1156] saving file wandb-metadata.json with policy now
+2026-03-31 20:33:28,800 INFO    Thread-12 :20177 [dir_watcher.py:_on_file_created():275] file/dir created: /project/60004/samuel/IFT6163_HW/wandb/run-20260331_203327-ne3h4v0r/files/wandb-summary.json
+2026-03-31 20:33:28,800 INFO    Thread-12 :20177 [dir_watcher.py:_on_file_created():275] file/dir created: /project/60004/samuel/IFT6163_HW/wandb/run-20260331_203327-ne3h4v0r/files/requirements.txt
+2026-03-31 20:33:28,800 INFO    Thread-12 :20177 [dir_watcher.py:_on_file_created():275] file/dir created: /project/60004/samuel/IFT6163_HW/wandb/run-20260331_203327-ne3h4v0r/files/conda-environment.yaml
+2026-03-31 20:33:28,801 INFO    Thread-12 :20177 [dir_watcher.py:_on_file_created():275] file/dir created: /project/60004/samuel/IFT6163_HW/wandb/run-20260331_203327-ne3h4v0r/files/wandb-metadata.json
+2026-03-31 20:33:28,806 DEBUG   HandlerThread:20177 [handler.py:handle_request():141] handle_request: stop_status
+2026-03-31 20:33:28,806 DEBUG   SenderThread:20177 [sender.py:send_request():316] send_request: stop_status
+2026-03-31 20:33:28,999 DEBUG   SenderThread:20177 [sender.py:send():302] send: telemetry
+2026-03-31 20:33:29,207 INFO    Thread-16 :20177 [upload_job.py:push():138] Uploaded file /tmp/tmp0yj6e9jhwandb/w2xuvrud-wandb-metadata.json
+2026-03-31 20:33:29,802 INFO    Thread-12 :20177 [dir_watcher.py:_on_file_created():275] file/dir created: /project/60004/samuel/IFT6163_HW/wandb/run-20260331_203327-ne3h4v0r/files/output.log
+2026-03-31 20:33:31,805 INFO    Thread-12 :20177 [dir_watcher.py:_on_file_modified():292] file/dir modified: /project/60004/samuel/IFT6163_HW/wandb/run-20260331_203327-ne3h4v0r/files/output.log
+2026-03-31 20:33:33,808 INFO    Thread-12 :20177 [dir_watcher.py:_on_file_modified():292] file/dir modified: /project/60004/samuel/IFT6163_HW/wandb/run-20260331_203327-ne3h4v0r/files/output.log
+2026-03-31 20:33:34,811 INFO    Thread-12 :20177 [dir_watcher.py:_on_file_modified():292] file/dir modified: /project/60004/samuel/IFT6163_HW/wandb/run-20260331_203327-ne3h4v0r/files/output.log
+2026-03-31 20:33:34,993 DEBUG   HandlerThread:20177 [handler.py:handle_request():141] handle_request: poll_exit
+2026-03-31 20:33:34,993 DEBUG   SenderThread:20177 [sender.py:send():302] send: exit
+2026-03-31 20:33:34,993 INFO    SenderThread:20177 [sender.py:send_exit():438] handling exit code: 1
+2026-03-31 20:33:34,993 INFO    SenderThread:20177 [sender.py:send_exit():440] handling runtime: 7
+2026-03-31 20:33:34,995 INFO    SenderThread:20177 [sender.py:_save_file():1156] saving file wandb-summary.json with policy end
+2026-03-31 20:33:34,995 INFO    SenderThread:20177 [sender.py:send_exit():446] send defer
+2026-03-31 20:33:34,995 DEBUG   SenderThread:20177 [sender.py:send_request():316] send_request: poll_exit
+2026-03-31 20:33:34,996 DEBUG   HandlerThread:20177 [handler.py:handle_request():141] handle_request: defer
+2026-03-31 20:33:34,996 INFO    HandlerThread:20177 [handler.py:handle_request_defer():164] handle defer: 0
+2026-03-31 20:33:34,997 DEBUG   SenderThread:20177 [sender.py:send_request():316] send_request: defer
+2026-03-31 20:33:34,997 INFO    SenderThread:20177 [sender.py:send_request_defer():455] handle sender defer: 0
+2026-03-31 20:33:34,997 INFO    SenderThread:20177 [sender.py:transition_state():459] send defer: 1
+2026-03-31 20:33:34,997 DEBUG   HandlerThread:20177 [handler.py:handle_request():141] handle_request: defer
+2026-03-31 20:33:34,997 INFO    HandlerThread:20177 [handler.py:handle_request_defer():164] handle defer: 1
+2026-03-31 20:33:35,078 DEBUG   SenderThread:20177 [sender.py:send_request():316] send_request: defer
+2026-03-31 20:33:35,078 INFO    SenderThread:20177 [sender.py:send_request_defer():455] handle sender defer: 1
+2026-03-31 20:33:35,078 INFO    SenderThread:20177 [sender.py:transition_state():459] send defer: 2
+2026-03-31 20:33:35,078 DEBUG   HandlerThread:20177 [handler.py:handle_request():141] handle_request: defer
+2026-03-31 20:33:35,078 INFO    HandlerThread:20177 [handler.py:handle_request_defer():164] handle defer: 2
+2026-03-31 20:33:35,078 DEBUG   SenderThread:20177 [sender.py:send():302] send: stats
+2026-03-31 20:33:35,079 DEBUG   SenderThread:20177 [sender.py:send_request():316] send_request: defer
+2026-03-31 20:33:35,079 INFO    SenderThread:20177 [sender.py:send_request_defer():455] handle sender defer: 2
+2026-03-31 20:33:35,079 INFO    SenderThread:20177 [sender.py:transition_state():459] send defer: 3
+2026-03-31 20:33:35,080 DEBUG   HandlerThread:20177 [handler.py:handle_request():141] handle_request: defer
+2026-03-31 20:33:35,080 INFO    HandlerThread:20177 [handler.py:handle_request_defer():164] handle defer: 3
+2026-03-31 20:33:35,081 DEBUG   SenderThread:20177 [sender.py:send_request():316] send_request: defer
+2026-03-31 20:33:35,081 INFO    SenderThread:20177 [sender.py:send_request_defer():455] handle sender defer: 3
+2026-03-31 20:33:35,081 INFO    SenderThread:20177 [sender.py:transition_state():459] send defer: 4
+2026-03-31 20:33:35,081 DEBUG   HandlerThread:20177 [handler.py:handle_request():141] handle_request: defer
+2026-03-31 20:33:35,081 INFO    HandlerThread:20177 [handler.py:handle_request_defer():164] handle defer: 4
+2026-03-31 20:33:35,081 DEBUG   SenderThread:20177 [sender.py:send():302] send: summary
+2026-03-31 20:33:35,083 INFO    SenderThread:20177 [sender.py:_save_file():1156] saving file wandb-summary.json with policy end
+2026-03-31 20:33:35,083 DEBUG   SenderThread:20177 [sender.py:send_request():316] send_request: defer
+2026-03-31 20:33:35,083 INFO    SenderThread:20177 [sender.py:send_request_defer():455] handle sender defer: 4
+2026-03-31 20:33:35,083 INFO    SenderThread:20177 [sender.py:transition_state():459] send defer: 5
+2026-03-31 20:33:35,083 DEBUG   HandlerThread:20177 [handler.py:handle_request():141] handle_request: defer
+2026-03-31 20:33:35,083 INFO    HandlerThread:20177 [handler.py:handle_request_defer():164] handle defer: 5
+2026-03-31 20:33:35,083 DEBUG   SenderThread:20177 [sender.py:send_request():316] send_request: defer
+2026-03-31 20:33:35,083 INFO    SenderThread:20177 [sender.py:send_request_defer():455] handle sender defer: 5
+2026-03-31 20:33:35,097 DEBUG   HandlerThread:20177 [handler.py:handle_request():141] handle_request: poll_exit
+2026-03-31 20:33:35,304 INFO    SenderThread:20177 [sender.py:transition_state():459] send defer: 6
+2026-03-31 20:33:35,304 DEBUG   SenderThread:20177 [sender.py:send_request():316] send_request: poll_exit
+2026-03-31 20:33:35,304 DEBUG   HandlerThread:20177 [handler.py:handle_request():141] handle_request: defer
+2026-03-31 20:33:35,304 INFO    HandlerThread:20177 [handler.py:handle_request_defer():164] handle defer: 6
+2026-03-31 20:33:35,305 DEBUG   SenderThread:20177 [sender.py:send_request():316] send_request: defer
+2026-03-31 20:33:35,305 INFO    SenderThread:20177 [sender.py:send_request_defer():455] handle sender defer: 6
+2026-03-31 20:33:35,405 DEBUG   HandlerThread:20177 [handler.py:handle_request():141] handle_request: poll_exit
+2026-03-31 20:33:35,813 INFO    Thread-12 :20177 [dir_watcher.py:_on_file_modified():292] file/dir modified: /project/60004/samuel/IFT6163_HW/wandb/run-20260331_203327-ne3h4v0r/files/wandb-summary.json
+2026-03-31 20:33:35,813 INFO    Thread-12 :20177 [dir_watcher.py:_on_file_modified():292] file/dir modified: /project/60004/samuel/IFT6163_HW/wandb/run-20260331_203327-ne3h4v0r/files/config.yaml
+2026-03-31 20:33:36,815 INFO    Thread-12 :20177 [dir_watcher.py:_on_file_modified():292] file/dir modified: /project/60004/samuel/IFT6163_HW/wandb/run-20260331_203327-ne3h4v0r/files/output.log
+2026-03-31 20:33:38,005 INFO    SenderThread:20177 [sender.py:transition_state():459] send defer: 7
+2026-03-31 20:33:38,005 DEBUG   SenderThread:20177 [sender.py:send_request():316] send_request: poll_exit
+2026-03-31 20:33:38,005 DEBUG   HandlerThread:20177 [handler.py:handle_request():141] handle_request: defer
+2026-03-31 20:33:38,005 INFO    HandlerThread:20177 [handler.py:handle_request_defer():164] handle defer: 7
+2026-03-31 20:33:38,006 DEBUG   SenderThread:20177 [sender.py:send_request():316] send_request: defer
+2026-03-31 20:33:38,006 INFO    SenderThread:20177 [sender.py:send_request_defer():455] handle sender defer: 7
+2026-03-31 20:33:38,006 INFO    SenderThread:20177 [dir_watcher.py:finish():362] shutting down directory watcher
+2026-03-31 20:33:38,107 DEBUG   HandlerThread:20177 [handler.py:handle_request():141] handle_request: poll_exit
+2026-03-31 20:33:38,818 INFO    SenderThread:20177 [dir_watcher.py:_on_file_modified():292] file/dir modified: /project/60004/samuel/IFT6163_HW/wandb/run-20260331_203327-ne3h4v0r/files/output.log
+2026-03-31 20:33:38,818 INFO    SenderThread:20177 [dir_watcher.py:finish():392] scan: /project/60004/samuel/IFT6163_HW/wandb/run-20260331_203327-ne3h4v0r/files
+2026-03-31 20:33:38,819 INFO    SenderThread:20177 [dir_watcher.py:finish():406] scan save: /project/60004/samuel/IFT6163_HW/wandb/run-20260331_203327-ne3h4v0r/files/config.yaml config.yaml
+2026-03-31 20:33:38,819 INFO    SenderThread:20177 [dir_watcher.py:finish():406] scan save: /project/60004/samuel/IFT6163_HW/wandb/run-20260331_203327-ne3h4v0r/files/wandb-summary.json wandb-summary.json
+2026-03-31 20:33:38,822 INFO    SenderThread:20177 [dir_watcher.py:finish():406] scan save: /project/60004/samuel/IFT6163_HW/wandb/run-20260331_203327-ne3h4v0r/files/requirements.txt requirements.txt
+2026-03-31 20:33:38,825 INFO    SenderThread:20177 [dir_watcher.py:finish():406] scan save: /project/60004/samuel/IFT6163_HW/wandb/run-20260331_203327-ne3h4v0r/files/conda-environment.yaml conda-environment.yaml
+2026-03-31 20:33:38,825 INFO    SenderThread:20177 [dir_watcher.py:finish():406] scan save: /project/60004/samuel/IFT6163_HW/wandb/run-20260331_203327-ne3h4v0r/files/wandb-metadata.json wandb-metadata.json
+2026-03-31 20:33:38,825 INFO    SenderThread:20177 [dir_watcher.py:finish():406] scan save: /project/60004/samuel/IFT6163_HW/wandb/run-20260331_203327-ne3h4v0r/files/output.log output.log
+2026-03-31 20:33:38,826 INFO    SenderThread:20177 [sender.py:transition_state():459] send defer: 8
+2026-03-31 20:33:38,826 DEBUG   SenderThread:20177 [sender.py:send_request():316] send_request: poll_exit
+2026-03-31 20:33:38,826 DEBUG   HandlerThread:20177 [handler.py:handle_request():141] handle_request: defer
+2026-03-31 20:33:38,826 INFO    HandlerThread:20177 [handler.py:handle_request_defer():164] handle defer: 8
+2026-03-31 20:33:38,829 DEBUG   SenderThread:20177 [sender.py:send_request():316] send_request: defer
+2026-03-31 20:33:38,829 INFO    SenderThread:20177 [sender.py:send_request_defer():455] handle sender defer: 8
+2026-03-31 20:33:38,829 INFO    SenderThread:20177 [file_pusher.py:finish():171] shutting down file pusher
+2026-03-31 20:33:38,933 DEBUG   HandlerThread:20177 [handler.py:handle_request():141] handle_request: poll_exit
+2026-03-31 20:33:38,934 DEBUG   SenderThread:20177 [sender.py:send_request():316] send_request: poll_exit
+2026-03-31 20:33:39,036 DEBUG   HandlerThread:20177 [handler.py:handle_request():141] handle_request: poll_exit
+2026-03-31 20:33:39,036 DEBUG   SenderThread:20177 [sender.py:send_request():316] send_request: poll_exit
+2026-03-31 20:33:39,140 DEBUG   HandlerThread:20177 [handler.py:handle_request():141] handle_request: poll_exit
+2026-03-31 20:33:39,140 DEBUG   SenderThread:20177 [sender.py:send_request():316] send_request: poll_exit
+2026-03-31 20:33:39,141 INFO    Thread-21 :20177 [upload_job.py:push():138] Uploaded file /project/60004/samuel/IFT6163_HW/wandb/run-20260331_203327-ne3h4v0r/files/output.log
+2026-03-31 20:33:39,179 INFO    Thread-20 :20177 [upload_job.py:push():138] Uploaded file /project/60004/samuel/IFT6163_HW/wandb/run-20260331_203327-ne3h4v0r/files/conda-environment.yaml
+2026-03-31 20:33:39,212 INFO    Thread-19 :20177 [upload_job.py:push():138] Uploaded file /project/60004/samuel/IFT6163_HW/wandb/run-20260331_203327-ne3h4v0r/files/requirements.txt
+2026-03-31 20:33:39,223 INFO    Thread-17 :20177 [upload_job.py:push():138] Uploaded file /project/60004/samuel/IFT6163_HW/wandb/run-20260331_203327-ne3h4v0r/files/config.yaml
+2026-03-31 20:33:39,242 DEBUG   HandlerThread:20177 [handler.py:handle_request():141] handle_request: poll_exit
+2026-03-31 20:33:39,242 DEBUG   SenderThread:20177 [sender.py:send_request():316] send_request: poll_exit
+2026-03-31 20:33:39,335 INFO    Thread-18 :20177 [upload_job.py:push():138] Uploaded file /project/60004/samuel/IFT6163_HW/wandb/run-20260331_203327-ne3h4v0r/files/wandb-summary.json
+2026-03-31 20:33:39,343 DEBUG   HandlerThread:20177 [handler.py:handle_request():141] handle_request: poll_exit
+2026-03-31 20:33:39,344 DEBUG   SenderThread:20177 [sender.py:send_request():316] send_request: poll_exit
+2026-03-31 20:33:39,444 DEBUG   HandlerThread:20177 [handler.py:handle_request():141] handle_request: poll_exit
+2026-03-31 20:33:39,445 DEBUG   SenderThread:20177 [sender.py:send_request():316] send_request: poll_exit
+2026-03-31 20:33:39,536 INFO    Thread-11 (_thread_body):20177 [sender.py:transition_state():459] send defer: 9
+2026-03-31 20:33:39,536 DEBUG   HandlerThread:20177 [handler.py:handle_request():141] handle_request: defer
+2026-03-31 20:33:39,536 INFO    HandlerThread:20177 [handler.py:handle_request_defer():164] handle defer: 9
+2026-03-31 20:33:39,536 DEBUG   SenderThread:20177 [sender.py:send_request():316] send_request: defer
+2026-03-31 20:33:39,536 INFO    SenderThread:20177 [sender.py:send_request_defer():455] handle sender defer: 9
+2026-03-31 20:33:39,546 DEBUG   HandlerThread:20177 [handler.py:handle_request():141] handle_request: poll_exit
+2026-03-31 20:33:39,660 INFO    SenderThread:20177 [sender.py:transition_state():459] send defer: 10
+2026-03-31 20:33:39,660 DEBUG   SenderThread:20177 [sender.py:send_request():316] send_request: poll_exit
+2026-03-31 20:33:39,660 DEBUG   HandlerThread:20177 [handler.py:handle_request():141] handle_request: defer
+2026-03-31 20:33:39,660 INFO    HandlerThread:20177 [handler.py:handle_request_defer():164] handle defer: 10
+2026-03-31 20:33:39,661 DEBUG   SenderThread:20177 [sender.py:send_request():316] send_request: defer
+2026-03-31 20:33:39,661 INFO    SenderThread:20177 [sender.py:send_request_defer():455] handle sender defer: 10
+2026-03-31 20:33:39,661 INFO    SenderThread:20177 [sender.py:transition_state():459] send defer: 11
+2026-03-31 20:33:39,661 DEBUG   SenderThread:20177 [sender.py:send():302] send: final
+2026-03-31 20:33:39,662 DEBUG   HandlerThread:20177 [handler.py:handle_request():141] handle_request: defer
+2026-03-31 20:33:39,662 INFO    HandlerThread:20177 [handler.py:handle_request_defer():164] handle defer: 11
+2026-03-31 20:33:39,662 DEBUG   SenderThread:20177 [sender.py:send():302] send: footer
+2026-03-31 20:33:39,662 DEBUG   SenderThread:20177 [sender.py:send_request():316] send_request: defer
+2026-03-31 20:33:39,662 INFO    SenderThread:20177 [sender.py:send_request_defer():455] handle sender defer: 11
+2026-03-31 20:33:39,762 DEBUG   HandlerThread:20177 [handler.py:handle_request():141] handle_request: poll_exit
+2026-03-31 20:33:39,762 DEBUG   SenderThread:20177 [sender.py:send_request():316] send_request: poll_exit
+2026-03-31 20:33:39,762 INFO    SenderThread:20177 [file_pusher.py:join():176] waiting for file pusher
+2026-03-31 20:33:39,992 DEBUG   HandlerThread:20177 [handler.py:handle_request():141] handle_request: sampled_history
+2026-03-31 20:33:39,993 DEBUG   HandlerThread:20177 [handler.py:handle_request():141] handle_request: get_summary
+2026-03-31 20:33:39,993 INFO    MainThread:20177 [wandb_run.py:_footer_history_summary_info():3305] rendering history
+2026-03-31 20:33:39,993 INFO    MainThread:20177 [wandb_run.py:_footer_history_summary_info():3337] rendering summary
+2026-03-31 20:33:39,993 INFO    MainThread:20177 [wandb_run.py:_footer_sync_info():3261] logging synced files
+2026-03-31 20:33:39,994 DEBUG   HandlerThread:20177 [handler.py:handle_request():141] handle_request: shutdown
+2026-03-31 20:33:39,994 INFO    HandlerThread:20177 [handler.py:finish():810] shutting down handler
+2026-03-31 20:33:40,662 INFO    WriterThread:20177 [datastore.py:close():279] close: /project/60004/samuel/IFT6163_HW/wandb/run-20260331_203327-ne3h4v0r/run-ne3h4v0r.wandb
+2026-03-31 20:33:40,891 INFO    SenderThread:20177 [sender.py:finish():1312] shutting down sender
+2026-03-31 20:33:40,891 INFO    SenderThread:20177 [file_pusher.py:finish():171] shutting down file pusher
+2026-03-31 20:33:40,891 INFO    SenderThread:20177 [file_pusher.py:join():176] waiting for file pusher
+2026-03-31 20:33:40,996 INFO    MainThread:20177 [internal.py:handle_exit():80] Internal process exited

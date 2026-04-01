@@ -1,0 +1,12 @@
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[Warning]: datasets path /opt/LIBERO/libero/libero/../datasets does not exist!
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[INFO] Model input_d=128, lin_map_pose input=7, obs_dim=13
+/opt/conda/envs/roble/lib/python3.10/site-packages/wandb/sdk/lib/import_hooks.py:246: DeprecationWarning: Deprecated since Python 3.4 and slated for removal in Python 3.12; use importlib.util.find_spec() instead
+  loader = importlib.find_loader(fullname, path)
+[GRPO 38400] return=-28.699 policy_loss=-0.0993
+[GRPO 76800] return=-28.931 policy_loss=-0.0993
+[GRPO 115200] return=-28.309 policy_loss=-0.0993
+[GRPO 153600] return=-28.008 policy_loss=-0.0993
+[GRPO 192000] return=-29.713 policy_loss=-0.0994
+[GRPO 230400] return=-27.758 policy_loss=-0.0994

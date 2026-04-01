@@ -1,0 +1,6 @@
+- +checkpoint=hw3/outputs/hw3_dense_ppo_seed0/dense_ppo_final.pth
+- simEval=[libero_fast]
+- testing=true
+- sim.task_set=libero_spatial
+- sim.eval_tasks=[9]
+- sim.eval_episodes=20

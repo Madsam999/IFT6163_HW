@@ -1,0 +1,57 @@
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[Warning]: datasets path /opt/LIBERO/libero/libero/../datasets does not exist!
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[INFO] Model input_d=128, lin_map_pose input=7, obs_dim=13
+/opt/conda/envs/roble/lib/python3.10/site-packages/wandb/sdk/lib/import_hooks.py:246: DeprecationWarning: Deprecated since Python 3.4 and slated for removal in Python 3.12; use importlib.util.find_spec() instead
+  loader = importlib.find_loader(fullname, path)
+[PPO 1024] return=-32.209
+[PPO 2048] return=-29.283
+[PPO 3072] return=-29.349
+Traceback (most recent call last):
+  File "/project/60004/samuel/IFT6163_HW/hw3/train_transformer_rl.py", line 654, in <module>
+    main()
+  File "/opt/conda/envs/roble/lib/python3.10/site-packages/hydra/main.py", line 90, in decorated_main
+    _run_hydra(
+  File "/opt/conda/envs/roble/lib/python3.10/site-packages/hydra/_internal/utils.py", line 389, in _run_hydra
+    _run_app(
+  File "/opt/conda/envs/roble/lib/python3.10/site-packages/hydra/_internal/utils.py", line 452, in _run_app
+    run_and_report(
+  File "/opt/conda/envs/roble/lib/python3.10/site-packages/hydra/_internal/utils.py", line 213, in run_and_report
+    return func()
+  File "/opt/conda/envs/roble/lib/python3.10/site-packages/hydra/_internal/utils.py", line 453, in <lambda>
+    lambda: hydra.run(
+  File "/opt/conda/envs/roble/lib/python3.10/site-packages/hydra/_internal/hydra.py", line 119, in run
+    ret = run_job(
+  File "/opt/conda/envs/roble/lib/python3.10/site-packages/hydra/core/utils.py", line 186, in run_job
+    ret.return_value = task_function(task_cfg)
+  File "/project/60004/samuel/IFT6163_HW/hw3/train_transformer_rl.py", line 512, in main
+    action_np, log_prob, _ = policy.get_action(obs)
+  File "/project/60004/samuel/IFT6163_HW/hw3/train_transformer_rl.py", line 137, in get_action
+    dist = self.forward(obs_t)
+  File "/project/60004/samuel/IFT6163_HW/hw3/train_transformer_rl.py", line 128, in forward
+    mean = self._compute_action_mean(obs)
+  File "/project/60004/samuel/IFT6163_HW/hw3/train_transformer_rl.py", line 119, in _compute_action_mean
+    x = block(x)
+  File "/opt/conda/envs/roble/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1736, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "/opt/conda/envs/roble/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1747, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/project/60004/samuel/IFT6163_HW/hw3/grp_model.py", line 95, in forward
+    x = x + self.sa(self.ln1(x), mask)
+  File "/opt/conda/envs/roble/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1736, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "/opt/conda/envs/roble/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1747, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/project/60004/samuel/IFT6163_HW/hw3/grp_model.py", line 66, in forward
+    out = torch.cat([h(x, mask) for h in self.heads], dim=-1)
+  File "/project/60004/samuel/IFT6163_HW/hw3/grp_model.py", line 66, in <listcomp>
+    out = torch.cat([h(x, mask) for h in self.heads], dim=-1)
+  File "/opt/conda/envs/roble/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1736, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "/opt/conda/envs/roble/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1747, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/project/60004/samuel/IFT6163_HW/hw3/grp_model.py", line 41, in forward
+    k = self.key(x)
+  File "/opt/conda/envs/roble/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1732, in _wrapped_call_impl
+    def _wrapped_call_impl(self, *args, **kwargs):
+KeyboardInterrupt

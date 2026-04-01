@@ -1,0 +1,6 @@
+- experiment.name=hw3_transformer_grpo_gt_fixed
+- r_seed=0
+- init_checkpoint=hw3/mini_GRP_Model/miniGRP.pth
+- rl.algorithm=grpo
+- sim.task_set=libero_spatial
+- sim.eval_tasks=[9]

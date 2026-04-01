@@ -1,0 +1,1 @@
+{"train/total_steps": 200000, "train/update": 500, "train/policy_loss": -0.10056663397699594, "train/mean_imagined_return": 1.7704555282058463, "train/imagined_return_std": 0.8895244943465278, "train/imagined_return": 1.9019032504998326, "_timestamp": 1774806013.8863478, "_runtime": 6376.2324006557465, "_step": 200000, "_wandb": {"runtime": 6375}}

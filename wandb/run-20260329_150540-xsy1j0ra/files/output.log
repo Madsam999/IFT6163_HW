@@ -1,0 +1,162 @@
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[Warning]: datasets path /opt/LIBERO/libero/libero/../datasets does not exist!
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[INFO] Model input_d=128, lin_map_pose input=7, obs_dim=13
+False  dreamerV3.py
+False
+[WorldModel] Loaded 0/38 keys from checkpoint
+/opt/conda/envs/roble/lib/python3.10/site-packages/wandb/sdk/lib/import_hooks.py:246: DeprecationWarning: Deprecated since Python 3.4 and slated for removal in Python 3.12; use importlib.util.find_spec() instead
+  loader = importlib.find_loader(fullname, path)
+[GRPO-WM] horizon=50, group_size=8
+[GRPO-WM 800] imagined_return=-5.039  policy_loss=-0.0993  return_std=0.0193
+[GRPO-WM 1600] imagined_return=-5.040  policy_loss=-0.0993  return_std=0.0113
+[GRPO-WM 2400] imagined_return=-5.040  policy_loss=-0.0993  return_std=0.0168
+[GRPO-WM 3200] imagined_return=-5.036  policy_loss=-0.0993  return_std=0.0198
+[GRPO-WM 4000] imagined_return=-5.036  policy_loss=-0.0993  return_std=0.0161
+[GRPO-WM 4800] imagined_return=-5.037  policy_loss=-0.0993  return_std=0.0165
+[GRPO-WM 5600] imagined_return=-5.038  policy_loss=-0.0993  return_std=0.0187
+[GRPO-WM 6400] imagined_return=-5.038  policy_loss=-0.0993  return_std=0.0189
+[GRPO-WM 7200] imagined_return=-5.038  policy_loss=-0.0993  return_std=0.0108
+[GRPO-WM 8000] imagined_return=-5.038  policy_loss=-0.0993  return_std=0.0210
+[GRPO-WM 8800] imagined_return=-5.038  policy_loss=-0.0993  return_std=0.0206
+[GRPO-WM 9600] imagined_return=-5.037  policy_loss=-0.0993  return_std=0.0166
+[GRPO-WM 10400] imagined_return=-5.037  policy_loss=-0.0993  return_std=0.0161
+[GRPO-WM 11200] imagined_return=-5.039  policy_loss=-0.0993  return_std=0.0202
+[GRPO-WM 12000] imagined_return=-5.040  policy_loss=-0.0993  return_std=0.0120
+[GRPO-WM 12800] imagined_return=-5.039  policy_loss=-0.0993  return_std=0.0060
+[GRPO-WM 13600] imagined_return=-5.039  policy_loss=-0.0993  return_std=0.0152
+[GRPO-WM 14400] imagined_return=-5.040  policy_loss=-0.0993  return_std=0.0159
+[GRPO-WM 15200] imagined_return=-5.039  policy_loss=-0.0993  return_std=0.0225
+[GRPO-WM 16000] imagined_return=-5.040  policy_loss=-0.0993  return_std=0.0092
+[GRPO-WM 16800] imagined_return=-5.040  policy_loss=-0.0993  return_std=0.0199
+[GRPO-WM 17600] imagined_return=-5.040  policy_loss=-0.0993  return_std=0.0206
+[GRPO-WM 18400] imagined_return=-5.042  policy_loss=-0.0993  return_std=0.0259
+[GRPO-WM 19200] imagined_return=-5.042  policy_loss=-0.0993  return_std=0.0142
+[GRPO-WM 20000] imagined_return=-5.041  policy_loss=-0.0993  return_std=0.0248
+[GRPO-WM 20800] imagined_return=-5.041  policy_loss=-0.0993  return_std=0.0204
+[GRPO-WM 21600] imagined_return=-5.042  policy_loss=-0.0993  return_std=0.0267
+[GRPO-WM 22400] imagined_return=-5.041  policy_loss=-0.0993  return_std=0.0229
+[GRPO-WM 23200] imagined_return=-5.041  policy_loss=-0.0993  return_std=0.0245
+[GRPO-WM 24000] imagined_return=-5.040  policy_loss=-0.0993  return_std=0.0189
+[GRPO-WM 24800] imagined_return=-5.040  policy_loss=-0.0993  return_std=0.0184
+[GRPO-WM 25600] imagined_return=-5.041  policy_loss=-0.0993  return_std=0.0244
+[GRPO-WM 26400] imagined_return=-5.040  policy_loss=-0.0993  return_std=0.0132
+[GRPO-WM 27200] imagined_return=-5.039  policy_loss=-0.0993  return_std=0.0198
+[GRPO-WM 28000] imagined_return=-5.040  policy_loss=-0.0993  return_std=0.0164
+[GRPO-WM 28800] imagined_return=-5.040  policy_loss=-0.0993  return_std=0.0209
+[GRPO-WM 29600] imagined_return=-5.038  policy_loss=-0.0993  return_std=0.0179
+[GRPO-WM 30400] imagined_return=-5.039  policy_loss=-0.0993  return_std=0.0175
+[GRPO-WM 31200] imagined_return=-5.039  policy_loss=-0.0993  return_std=0.0144
+[GRPO-WM 32000] imagined_return=-5.040  policy_loss=-0.0993  return_std=0.0178
+[GRPO-WM 32800] imagined_return=-5.040  policy_loss=-0.0993  return_std=0.0137
+[GRPO-WM 33600] imagined_return=-5.039  policy_loss=-0.0993  return_std=0.0226
+[GRPO-WM 34400] imagined_return=-5.039  policy_loss=-0.0993  return_std=0.0136
+[GRPO-WM 35200] imagined_return=-5.039  policy_loss=-0.0993  return_std=0.0333
+[GRPO-WM 36000] imagined_return=-5.041  policy_loss=-0.0993  return_std=0.0105
+[GRPO-WM 36800] imagined_return=-5.040  policy_loss=-0.0993  return_std=0.0151
+[GRPO-WM 37600] imagined_return=-5.041  policy_loss=-0.0993  return_std=0.0155
+[GRPO-WM 38400] imagined_return=-5.041  policy_loss=-0.0993  return_std=0.0131
+[GRPO-WM 39200] imagined_return=-5.042  policy_loss=-0.0993  return_std=0.0130
+[GRPO-WM 40000] imagined_return=-5.042  policy_loss=-0.0993  return_std=0.0259
+[GRPO-WM 40800] imagined_return=-5.042  policy_loss=-0.0993  return_std=0.0179
+[GRPO-WM 41600] imagined_return=-5.042  policy_loss=-0.0993  return_std=0.0093
+[GRPO-WM 42400] imagined_return=-5.041  policy_loss=-0.0993  return_std=0.0228
+[GRPO-WM 43200] imagined_return=-5.040  policy_loss=-0.0993  return_std=0.0211
+[GRPO-WM 44000] imagined_return=-5.040  policy_loss=-0.0993  return_std=0.0188
+[GRPO-WM 44800] imagined_return=-5.040  policy_loss=-0.0993  return_std=0.0120
+[GRPO-WM 45600] imagined_return=-5.039  policy_loss=-0.0993  return_std=0.0223
+[GRPO-WM 46400] imagined_return=-5.040  policy_loss=-0.0993  return_std=0.0200
+[GRPO-WM 47200] imagined_return=-5.039  policy_loss=-0.0993  return_std=0.0203
+[GRPO-WM 48000] imagined_return=-5.040  policy_loss=-0.0993  return_std=0.0176
+[GRPO-WM 48800] imagined_return=-5.040  policy_loss=-0.0993  return_std=0.0159
+[GRPO-WM 49600] imagined_return=-5.040  policy_loss=-0.0993  return_std=0.0174
+[GRPO-WM 50400] imagined_return=-5.042  policy_loss=-0.0993  return_std=0.0158
+[GRPO-WM 51200] imagined_return=-5.042  policy_loss=-0.0993  return_std=0.0113
+[GRPO-WM 52000] imagined_return=-5.042  policy_loss=-0.0993  return_std=0.0135
+[GRPO-WM 52800] imagined_return=-5.042  policy_loss=-0.0993  return_std=0.0173
+[GRPO-WM 53600] imagined_return=-5.042  policy_loss=-0.0993  return_std=0.0153
+[GRPO-WM 54400] imagined_return=-5.041  policy_loss=-0.0993  return_std=0.0272
+[GRPO-WM 55200] imagined_return=-5.042  policy_loss=-0.0993  return_std=0.0130
+[GRPO-WM 56000] imagined_return=-5.042  policy_loss=-0.0993  return_std=0.0160
+[GRPO-WM 56800] imagined_return=-5.042  policy_loss=-0.0993  return_std=0.0151
+[GRPO-WM 57600] imagined_return=-5.043  policy_loss=-0.0993  return_std=0.0278
+[GRPO-WM 58400] imagined_return=-5.042  policy_loss=-0.0993  return_std=0.0177
+[GRPO-WM 59200] imagined_return=-5.041  policy_loss=-0.0993  return_std=0.0314
+[GRPO-WM 60000] imagined_return=-5.041  policy_loss=-0.0993  return_std=0.0220
+[GRPO-WM 60800] imagined_return=-5.042  policy_loss=-0.0993  return_std=0.0214
+[GRPO-WM 61600] imagined_return=-5.042  policy_loss=-0.0993  return_std=0.0232
+[GRPO-WM 62400] imagined_return=-5.042  policy_loss=-0.0993  return_std=0.0208
+[GRPO-WM 63200] imagined_return=-5.042  policy_loss=-0.0993  return_std=0.0129
+[GRPO-WM 64000] imagined_return=-5.041  policy_loss=-0.0993  return_std=0.0275
+[GRPO-WM 64800] imagined_return=-5.041  policy_loss=-0.0993  return_std=0.0144
+[GRPO-WM 65600] imagined_return=-5.042  policy_loss=-0.0993  return_std=0.0180
+[GRPO-WM 66400] imagined_return=-5.042  policy_loss=-0.0993  return_std=0.0202
+[GRPO-WM 67200] imagined_return=-5.044  policy_loss=-0.0993  return_std=0.0275
+[GRPO-WM 68000] imagined_return=-5.042  policy_loss=-0.0993  return_std=0.0094
+[GRPO-WM 68800] imagined_return=-5.042  policy_loss=-0.0993  return_std=0.0161
+[GRPO-WM 69600] imagined_return=-5.042  policy_loss=-0.0993  return_std=0.0247
+[GRPO-WM 70400] imagined_return=-5.042  policy_loss=-0.0993  return_std=0.0231
+[GRPO-WM 71200] imagined_return=-5.042  policy_loss=-0.0993  return_std=0.0296
+[GRPO-WM 72000] imagined_return=-5.043  policy_loss=-0.0993  return_std=0.0274
+[GRPO-WM 72800] imagined_return=-5.042  policy_loss=-0.0993  return_std=0.0199
+[GRPO-WM 73600] imagined_return=-5.040  policy_loss=-0.0994  return_std=0.0104
+[GRPO-WM 74400] imagined_return=-5.040  policy_loss=-0.0993  return_std=0.0139
+[GRPO-WM 75200] imagined_return=-5.037  policy_loss=-0.0993  return_std=0.0195
+[GRPO-WM 76000] imagined_return=-5.039  policy_loss=-0.0993  return_std=0.0262
+[GRPO-WM 76800] imagined_return=-5.040  policy_loss=-0.0994  return_std=0.0312
+[GRPO-WM 77600] imagined_return=-5.038  policy_loss=-0.0994  return_std=0.0135
+[GRPO-WM 78400] imagined_return=-5.038  policy_loss=-0.0994  return_std=0.0205
+[GRPO-WM 79200] imagined_return=-5.038  policy_loss=-0.0993  return_std=0.0159
+[GRPO-WM 80000] imagined_return=-5.038  policy_loss=-0.0993  return_std=0.0279
+[GRPO-WM 80800] imagined_return=-5.038  policy_loss=-0.0994  return_std=0.0150
+[GRPO-WM 81600] imagined_return=-5.039  policy_loss=-0.0994  return_std=0.0137
+[GRPO-WM 82400] imagined_return=-5.039  policy_loss=-0.0994  return_std=0.0194
+[GRPO-WM 83200] imagined_return=-5.039  policy_loss=-0.0993  return_std=0.0281
+Traceback (most recent call last):
+  File "/project/60004/samuel/IFT6163_HW/hw3/train_transformer_rl.py", line 726, in <module>
+    f"return_std={update_info['imagined_return_std']:.4f}")
+  File "/opt/conda/envs/roble/lib/python3.10/site-packages/hydra/main.py", line 90, in decorated_main
+    _run_hydra(
+  File "/opt/conda/envs/roble/lib/python3.10/site-packages/hydra/_internal/utils.py", line 389, in _run_hydra
+    _run_app(
+  File "/opt/conda/envs/roble/lib/python3.10/site-packages/hydra/_internal/utils.py", line 452, in _run_app
+    run_and_report(
+  File "/opt/conda/envs/roble/lib/python3.10/site-packages/hydra/_internal/utils.py", line 213, in run_and_report
+    return func()
+  File "/opt/conda/envs/roble/lib/python3.10/site-packages/hydra/_internal/utils.py", line 453, in <lambda>
+    lambda: hydra.run(
+  File "/opt/conda/envs/roble/lib/python3.10/site-packages/hydra/_internal/hydra.py", line 119, in run
+    ret = run_job(
+  File "/opt/conda/envs/roble/lib/python3.10/site-packages/hydra/core/utils.py", line 186, in run_job
+    ret.return_value = task_function(task_cfg)
+  File "/project/60004/samuel/IFT6163_HW/hw3/train_transformer_rl.py", line 681, in main
+    raise ValueError("grpo_worldmodel requires world_model_checkpoint in config")
+  File "/project/60004/samuel/IFT6163_HW/hw3/train_transformer_rl.py", line 463, in grpo_worldmodel_update
+    """
+  File "/project/60004/samuel/IFT6163_HW/hw3/train_transformer_rl.py", line 165, in get_action
+    dist = self.forward(obs_t)
+  File "/project/60004/samuel/IFT6163_HW/hw3/train_transformer_rl.py", line 152, in forward
+    mean = self._compute_action_mean(obs)
+  File "/project/60004/samuel/IFT6163_HW/hw3/train_transformer_rl.py", line 142, in _compute_action_mean
+    x = block(x)
+  File "/opt/conda/envs/roble/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1736, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "/opt/conda/envs/roble/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1747, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/project/60004/samuel/IFT6163_HW/hw3/grp_model.py", line 95, in forward
+    x = x + self.sa(self.ln1(x), mask)
+  File "/opt/conda/envs/roble/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1736, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "/opt/conda/envs/roble/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1747, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/project/60004/samuel/IFT6163_HW/hw3/grp_model.py", line 66, in forward
+    out = torch.cat([h(x, mask) for h in self.heads], dim=-1)
+  File "/project/60004/samuel/IFT6163_HW/hw3/grp_model.py", line 66, in <listcomp>
+    out = torch.cat([h(x, mask) for h in self.heads], dim=-1)
+  File "/opt/conda/envs/roble/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1736, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "/opt/conda/envs/roble/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1747, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/project/60004/samuel/IFT6163_HW/hw3/grp_model.py", line 44, in forward
+    if mask is not None:
+KeyboardInterrupt

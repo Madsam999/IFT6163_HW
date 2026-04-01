@@ -1,0 +1,6 @@
+- +checkpoint=./hw3/miniGRP_Model/miniGRP.pth
+- simEval=[libero_fast]
+- testing=true
+- sim.task_set=libero_spatial
+- sim.eval_tasks=[9]
+- sim.eval_episodes=20
